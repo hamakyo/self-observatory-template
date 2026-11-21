@@ -14,26 +14,9 @@ export const query = (
       params.set(key, String(value));
   return `/api/${path}?${params}`;
 };
-const errors: Record<string, string> = {
-  note_not_found: "この時点にはこのノートがありません。",
-  snapshot_not_found: "指定した時点が見つかりません。",
-  snapshot_not_indexed:
-    "この時点は未索引です。CLI で索引を更新してから再読み込みしてください。",
-  index_unavailable:
-    "索引が見つからないか古くなっています。再構築してください。",
-  index_corrupt: "索引を読み込めません。再構築してください。",
-  invalid_time_range:
-    "開始時点が終了時点より後になっています。選び直してください。",
-  stale_response:
-    "表示中の時点とデータがずれています。再読み込みしてください。",
-  media_blob_not_found: "この時点の画像を表示できません。",
-};
 export class ApiError extends Error {
   constructor(public code: string) {
-    super(
-      errors[code] ||
-        "データを読み込めませんでした。API が起動しているか確認してください。",
-    );
+    super(code);
   }
 }
 export async function request<T>(

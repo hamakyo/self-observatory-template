@@ -1,98 +1,100 @@
 # AGENTS.md
 
-## 目的
+[English](AGENTS.md) | [日本語](docs/ja/AGENTS.md)
 
-オーナー自身をバージョン管理する個人モデル（Git-native Personal OS）の正本。単なるメモやスクラッチパッドではなく、長期的に残る記憶と再利用可能な判断基準を管理する。
+## Purpose
 
-## 正本と生成物
+This repository is the source of truth for an inspectable, version-controlled personal model (**Git-native Personal OS**). It is not a raw scratchpad; it stores durable memory and reusable judgment criteria over time.
 
-- 正本：この repo 内の Markdown ファイル（`memory/`、`playbooks/`、`decisions/`、`journals/`、`reviews/`、`design/`、`docs/` 等）
-- 生成物・派生層（正本ではない）：外部 DB、埋め込み、グラフ、キャッシュ、PDF、UI。生成物は正本から作り直す前提で扱う
-- デザイン原則の正本：`design/`（`design/README.md` と `design/tokens.json`）
+## Source of truth and derived artifacts
 
-## スキーマ
+- **Source of truth**: Markdown files in this repository (`memory/`, `playbooks/`, `decisions/`, `journals/`, `reviews/`, `design/`, `docs/`, etc.)
+- **Derived layers (not source of truth)**: external databases, embeddings, graphs, caches, PDFs, and UIs. Treat every derived layer as rebuildable from Markdown + Git.
+- **Design principles source of truth**: `design/` (`design/README.md` and `design/tokens.json`)
 
-### ディレクトリと検索の優先順位
+## Schema
 
-複数ノートが該当する場合は、次の優先順で参照する。
+### Directories and lookup priority
+
+When multiple notes match a query, consult them in this order:
 
 1. `memory/principles/`
 2. `playbooks/`
 3. `memory/patterns/`
 4. `memory/knowledge/`
 5. `memory/episodes/`
-6. `_imports/`（サニタイズ済みの来歴確認・移行作業のみ）
+6. `_imports/` (sanitized provenance checks and migration work only)
 
-同じ階層内では次を優先する（新しいだけでは正しさの証明にしない）。
+Within the same layer, prioritize (recency alone is not proof of truth):
 
-- `status: superseded` より `status: active`
-- 成熟度が高いもの（`stable > tested > observed > seed`）
-- 同格の場合は `updated` が新しいもの
+- `status: active` over `status: superseded`
+- Higher maturity (`stable > tested > observed > seed`)
+- More recent `updated` date when equal
 
-### 記述と ID の規則
+### Authoring and ID conventions
 
-- 巨大な1ファイルにまとめず、小さく組み合わせ可能なファイルに分ける。
-- ファイル名は kebab-case にする。
-- 永続ノートには不変の安定 `id` を付ける。
-- 関連ノートは `related`・`derived_from`・`supersedes` と Markdown リンクでつなぐ。
-- 事実の観察（observation）と解釈（interpretation）を分ける。
-- 原則（principles）は簡潔に保ち、手順は `playbooks/` に置く。
+- Keep files small and composable instead of piling everything into one giant file.
+- Use kebab-case filenames.
+- Assign an immutable stable `id` to durable notes.
+- Connect related notes using `related`, `derived_from`, `supersedes`, and Markdown links.
+- Separate factual observation from interpretation.
+- Keep `memory/principles/` concise; place executable procedures in `playbooks/`.
 
-### 知識の昇格と信念の更新
+### Knowledge promotion and belief updates
 
 ```text
 Episode → Pattern → Principle → Playbook
 ```
 
-- 単一のエピソードを自動でパターンや原則に昇格させない。繰り返しの根拠かオーナーの明示判断を確認してから昇格させる。
-- 相反する信念は無理に統合せず、状態と時期を明記して併存させる。
-- 信念を更新するときは、(1) 新しいノートを作成・更新、(2) 旧ノートに `status: superseded` を付与、(3) `superseded_by` を追記、(4) 旧内容と Git 履歴を残す。
+- Never auto-promote a single episode into a pattern or principle. Require repeated evidence or explicit owner confirmation.
+- Do not force conflicting beliefs into false harmony; record both with their status and time context.
+- When updating a belief: (1) create or update the new note, (2) mark the old note `status: superseded`, (3) add `superseded_by`, and (4) preserve the old content and Git history.
 
-## 更新の流れ
+## Update workflow
 
-### セキュリティ・プライバシー書き込みゲート（必須）
+### Security & privacy write gate (mandatory)
 
-業務システム・外部アプリ・私的会話・文書・メディア由来の内容を書き込む前に必ず `DATA_POLICY.md` を読み、すべての永続書き込み前に次を実施する。
+Before writing content derived from work systems, external apps, private conversations, documents, or media, read `DATA_POLICY.md` and perform every step below:
 
-1. **情報源の分類**：公開 / 自己私的 / 自己高機密 / 第三者個人情報 / 勤務先機密 / 認証情報
-2. **最小化**：再利用可能な学びだけを残す
-3. **匿名化**：個人特定が不要な場合は氏名や特定可能な組み合わせを除く
-4. **業務データの抽象化**：勤務先・顧客・ベンダーの機密原本は持ち込まない
-5. **メディアの無害化**：画像・文書を追加する前に識別子を伏せメタデータを削除する
-6. **不確実な情報の隔離**：保持してよい確信が持てないデータは commit しない
+1. **Classify the source**: public / self-private / self-high-sensitivity / third-party PII / employer-confidential / credentials.
+2. **Minimize**: keep only the reusable lesson.
+3. **Anonymize**: remove names and identifying combinations unless strictly necessary.
+4. **Abstract work data**: never bring in raw employer, customer, or vendor confidential material.
+5. **Sanitize media**: redact identifiers and strip metadata before adding images or documents.
+6. **Quarantine uncertainty**: if you are not sure data is safe to persist, do not commit it.
 
-**残すのは秘密ではなく学び（Store the lesson, not the secret）。**
+**Store the lesson, not the secret.**
 
-### 通常更新・変更反映
+### Standard updates
 
-1. 上記ゲートを通したうえで、該当フォルダの Markdown を追加・更新する（来歴となるエピソード・決定・外部情報源のリンクや ID を残す）
-2. 原則（principles）・プレイブック・安定したパターンの変更は、オーナーから直接編集の明示指示がない限り Pull Request で提案する（AI が提案し、人が決める）
-3. 確認後 commit & push（または PR 作成）する
+1. Pass the write gate above, then add or edit canonical Markdown under the appropriate directory (preserving provenance links/IDs to episodes, decisions, or external sources).
+2. Propose changes to principles, playbooks, and stable patterns via Pull Request unless the owner explicitly asks for a direct edit (**AI proposes; the human decides**).
+3. Commit and push (or open a PR) after verification.
 
-### ChatGPT / GitHub コネクタからの取り込み
+### Capturing via chat / GitHub connectors
 
-「残して」「メモして」等の指示を受けたときは `docs/capture.md` に従う。
+When asked to “save this” or “capture this”, follow `docs/capture.md`:
 
-1. 会話の生ログは原則コピーせず、再利用可能な最小限の意味だけ抽出する
-2. GitHub へ書く前にプライバシー・機密ゲートを通す（private Issue も永続データ）
-3. 既定の入口はサニタイズ済みの Capture Issue とし、正本ではなくオープンループとして扱う
-4. 観察・解釈・不確実性を分け、会話上の推測を事実に格上げしない
-5. 後から正本ノートにするときはサニタイズ済み Issue を参照し、生の会話ログや私的 URL に依存しない
-6. 置き場所が定まってから正本 Markdown へ昇格させる（重要な自己モデルの変更は PR を優先。明示の直接編集指示がある場合は同じ安全ゲートを通したうえで直接書き込んでよい）
+1. Do not copy raw conversation logs; extract only the minimal reusable meaning.
+2. Run the privacy and secrets gate before writing to GitHub (private Issues are persisted data).
+3. Default ingress is a sanitized Capture Issue treated as an open loop, not canonical memory.
+4. Separate observation, interpretation, and uncertainty; never upgrade conversational guesses into facts.
+5. Reference the sanitized Capture Issue when promoting to canonical Markdown instead of private chat URLs or raw transcripts.
+6. Promote into canonical Markdown once placement is clear (prefer PRs for material self-model changes; direct edits are allowed only on explicit owner instruction after passing the same write gate).
 
-## デザイン・コンテンツ生成
+## Design and content generation
 
-ビジュアル・編集物・Web・スライド等を生成する前に、(1) `design/README.md` を読む、(2) `design/tokens.json` の色とタイポグラフィを使う、(3) デザイン思想と矛盾する汎用 AI っぽい表現を持ち込まない。
+Before generating visuals, editorial pages, web UIs, or slides: (1) read `design/README.md`, (2) use colors and typography from `design/tokens.json`, and (3) avoid generic AI-slop visuals or copy clichés.
 
-## 禁止事項
+## Prohibitions
 
-- 秘密情報（パスワード・API キー・アクセストークン・リカバリコード・認証情報）の commit
-- オーナーの自己像・原則のサイレントな書き換え（追記・明示的な supersession・レビュー可能な差分を原則とする）
-- 弱い根拠からの機微な個人事実の推測（明示的観察と仮説を分ける）
-- 生の外部エクスポートやダンプのステージング目的での commit（ローカルの gitignore 済み隔離領域でサニタイズし、安全な正規化結果だけを正本フォルダへ入れる）
-- 公開ワークフローとして個人の記録が入った repo 自体を public にすること（公開が必要な場合はサニタイズした別派生を作る）
+- Committing secrets (passwords, API keys, access tokens, recovery codes, credentials)
+- Silently rewriting the owner's self-model or principles (prefer additive updates, explicit supersession, and reviewable diffs)
+- Inferring sensitive personal facts from weak evidence (keep explicit observations separate from hypotheses)
+- Committing raw external exports or dumps as staging data (sanitize inside gitignored local quarantine and commit only normalized safe outputs)
+- Making a repository containing personal records public (create a separate sanitized derivative if public sharing is needed)
 
-## 除外・対象外
+## Out of scope
 
-- 記事や投稿の生の全文切り抜きは別のクリップ用リポジトリ等に置く。意思決定に使った知識だけを言い換えて `memory/knowledge/` へ昇格させ、出典へのリンクを貼る。
-- 履歴書・応募書類や連絡先等の高機密な個人情報は別の専用プライベートリポジトリ等に分離し、このリポジトリには置かない。
+- Store raw full-text clippings of articles or posts in a separate clipping repo. Promote only decision-relevant knowledge in your own words into `memory/knowledge/` with a source link.
+- Keep highly sensitive personal documents (resumes, applications, contact details, etc.) in a separate private repository rather than here.

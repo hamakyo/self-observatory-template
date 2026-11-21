@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Markdown from "react-markdown";
-import { type Load, type Note } from "./api";
+import { ApiError, type Load, type Note } from "./api";
+import { useI18n } from "./i18n";
 import {
   confirmation,
   noteTypeLabel,
@@ -16,27 +17,30 @@ export function Status<T>({
   load: Load<T>;
   children: (data: T) => ReactNode;
 }) {
+  const { t } = useI18n();
   if (load.status === "loading")
     return (
       <p className="message" role="status">
-        読み込み中…
+        {t.loading}
       </p>
     );
-  if (load.status === "error")
+  if (load.status === "error") {
+    const message =
+      load.error instanceof ApiError
+        ? t.errors[load.error.code] || t.errors.default
+        : load.error.message || t.errors.default;
     return (
       <div className="message warning" role="alert">
-        <p>{load.error.message}</p>
-        <button onClick={() => window.location.reload()}>再読み込み</button>
+        <p>{message}</p>
+        <button onClick={() => window.location.reload()}>{t.reload}</button>
       </div>
     );
+  }
   return children(load.data);
 }
-export function Empty({
-  children = "該当するノートはありません。",
-}: {
-  children?: ReactNode;
-}) {
-  return <p className="message">{children}</p>;
+export function Empty({ children }: { children?: ReactNode }) {
+  const { t } = useI18n();
+  return <p className="message">{children ?? t.emptyDefault}</p>;
 }
 export function NoteList({
   notes,
@@ -47,6 +51,7 @@ export function NoteList({
   selected: string;
   update: Update;
 }) {
+  const { lang } = useI18n();
   if (!notes.length) return <Empty />;
   return (
     <ul className="note-list">
@@ -59,14 +64,17 @@ export function NoteList({
           >
             <span>
               <span className="eyebrow">
-                {noteTypeLabel(note.frontmatter.type)} ·{" "}
-                {statusLabel(note.frontmatter.status)}
+                {noteTypeLabel(note.frontmatter.type, lang)} ·{" "}
+                {statusLabel(note.frontmatter.status, lang)}
               </span>
               <strong>{note.title}</strong>
               <small>{note.id}</small>
             </span>
             <span className="note-tail">
-              {confirmation(review(note.frontmatter.review).owner_confirmed)}
+              {confirmation(
+                review(note.frontmatter.review).owner_confirmed,
+                lang,
+              )}
               <span aria-hidden="true">↗</span>
             </span>
           </button>
@@ -84,22 +92,24 @@ export function Pager({
   next: number | null;
   update: Update;
 }) {
+  const { t } = useI18n();
   return (
     <div className="pager">
       <button
         disabled={cursor === 0}
         onClick={() => update({ cursor: Math.max(0, cursor - 20) })}
       >
-        前の20件
+        {t.prevPage}
       </button>
-      <span>{cursor + 1}件目〜</span>
+      <span>{t.fromItem(cursor + 1)}</span>
       <button disabled={next === null} onClick={() => update({ cursor: next })}>
-        次の20件
+        {t.nextPage}
       </button>
     </div>
   );
 }
 export function SafeMarkdown({ body }: { body: string }) {
+  const { t } = useI18n();
   return (
     <div className="markdown">
       <Markdown
@@ -107,7 +117,7 @@ export function SafeMarkdown({ body }: { body: string }) {
         components={{
           img: ({ alt }) => (
             <span className="media-placeholder">
-              画像: {alt || "説明なし"}（自動読込なし）
+              {t.imagePlaceholder(alt || "")}
             </span>
           ),
           a: ({ href, children }) =>
@@ -117,7 +127,7 @@ export function SafeMarkdown({ body }: { body: string }) {
               </a>
             ) : (
               <span>
-                {children} <small>({href || "リンクなし"})</small>
+                {children} <small>({href || t.noLink})</small>
               </span>
             ),
         }}

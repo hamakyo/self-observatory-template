@@ -1,17 +1,19 @@
-# self-observatory 取扱説明書
+# How to Use self-observatory
 
-> **自分を記録するのではなく、自分の変化を記録する。**
+[English](how-to-use.md) | [日本語](ja/how-to-use.md)
 
-`self-observatory` は、自分について何でも保存する場所ではありません。  
-経験が自分の判断をどう変えたかを記録し、あとから観測できる形にするためのシステムです。
+> **Record how you change, not just who you are today.**
 
-## 30秒で使う
+`self-observatory` is not a place to dump everything about yourself.  
+It is a system for recording how lived experience changes your judgment and inspecting that trajectory over time.
 
-1. 何か引っかかったら **Capture** する
-2. あとで必要なら **Episode / Pattern / Principle** に整理する
-3. 判断や対処に使えるものは **Playbook** にする
-4. 実際に行動する
-5. 結果を振り返り、また Capture に戻す
+## The 30-second loop
+
+1. **Capture** anything that stands out.
+2. When it holds up, promote it into an **Episode**, **Pattern**, or **Principle**.
+3. Turn actionable judgment into a **Playbook**.
+4. **Act** in the real world.
+5. **Reflect** on the outcome and feed it back into Capture.
 
 ```text
 Observe / Capture
@@ -30,97 +32,88 @@ Reflection
       └────────→ Capture
 ```
 
-すべての記録が最後まで昇格する必要はありません。  
-**分類に迷ったら、まず Capture する。整理はあとで大丈夫です。**
+Not every note needs to reach the end of the loop.  
+**When unsure how to classify something, just capture it first. Organize later.**
 
-## 何を書く？
+## What to write
 
-たとえば、こんなものを残します。
+Good candidates include:
 
-- 今日こういう出来事があった
-- 以前と考え方が変わった
-- 同じ失敗や反応が何度か起きている
-- 自分にはこういう傾向があるかもしれない
-- この考え方は今後も使えそう
-- 過去の自分と現在の自分が矛盾している
+- Something concrete that happened today
+- A moment your mind changed compared to an earlier belief
+- A recurring mistake, reaction, or pattern
+- A hypothesis about how you work best
+- A rule of thumb likely to stay useful
+- A tension or contradiction between past and present views
 
-完成した結論である必要はありません。  
-「こうかもしれない」という仮説も、時間をかけて検証します。
+You do not need finished conclusions. Tentative hypotheses are meant to be tested over time.
 
-## どこに書く？
+## Where notes live
 
-| 書きたいこと | 場所 |
-|---|---|
-| 起きたこと | `memory/episodes/` |
-| 再利用したい知識・説明 | `memory/knowledge/` |
-| 影響を受けた言葉・作品 | `memory/influences/` |
-| 繰り返している傾向 | `memory/patterns/` |
-| 判断基準 | `memory/principles/` |
-| 実際の対処法 | `playbooks/` |
-| 大きな意思決定 | `decisions/` |
-| 時系列の思考 | `journals/` |
-| 定期的な振り返り | `reviews/` |
+| What you want to record | Directory |
+| --- | --- |
+| What happened | `memory/episodes/` |
+| Reusable facts or explanations | `memory/knowledge/` |
+| Formative words or works (with source) | `memory/influences/` |
+| Recurring tendencies across episodes | `memory/patterns/` |
+| Compact rules for judgment | `memory/principles/` |
+| Executable procedures | `playbooks/` |
+| Major decisions and trade-offs | `decisions/` |
+| Chronological reflection | `journals/` |
+| Periodic consolidation and review decisions | `reviews/` |
 
-入口では分類を完璧にしなくて構いません。  
-まず安全な形で Capture し、意味が見えてから昇格させます。
+You do not need perfect placement at capture time. Start in a safe capture space and promote once the meaning is clear.
 
-## 記録は育てる
+## Let notes mature gradually
 
-一度思ったことを、そのまま「自分の性格」や「原則」にしません。
+Never turn a single reaction straight into a permanent principle or identity label.
 
 ```text
 seed → observed → tested → stable
 ```
 
-現実に合わなくなった考えは消さず、`superseded` として新しい考えへつなぎます。
+When an older belief stops fitting reality, do not silently delete it. Mark it `superseded` and link it to the newer note so your change history stays inspectable.
 
-古い自分を上書きするのではなく、**どう変化したかを履歴として残す**ためです。
+## Core rules
 
-## 基本原則
+- Do not define yourself from a single event.
+- Do not silently erase older beliefs.
+- Keep contradictions visible rather than smoothing them over.
+- Preserve provenance and sources.
+- Keep uncertain claims marked as uncertain.
+- AI proposes; the human decides.
+- Store the reusable lesson, not raw secrets.
 
-- 一度の出来事から自分を定義しない
-- 古い考えを黙って消さない
-- 矛盾を残す
-- 出典や由来を残す
-- 不確かなものは不確かなまま扱う
-- AIは提案する。最終的に決めるのは人間
-- 秘密そのものではなく、再利用できる教訓を保存する
+## What this is not
 
-## これは何ではない？
+`self-observatory` is not intended to be:
 
-`self-observatory` は、次のものを目指していません。
+- A diary
+- A second brain or catch-all wiki
+- A personality test or fixed self-profile
+- A system that lets AI decide who you are
 
-- 日記帳
-- 第二の脳
-- 個人Wiki
-- 性格診断
-- 固定された自己プロフィール
-- AIに「自分とは何者か」を決めてもらう仕組み
-
-目的は、経験を保存することそのものではなく、
+Its purpose is to track the feedback loop:
 
 ```text
-経験 → 仮説 → 検証 → 判断 → 行動 → 再評価
+Experience → Hypothesis → Test → Judgment → Action → Revision
 ```
 
-という変化の過程を追跡することです。
+## When in doubt
 
-## 迷ったときの判断
+> **Capture first. Decide later.**
 
-> **まず Capture。結論はあとでいい。**
-
-現在の自分を定義するためではなく、  
-**自分がどう変わってきたかを観測するために使います。**
+Use it to observe how you change over time, not to freeze who you are today.
 
 ---
 
-詳しい手順やルールは以下を参照してください。
+See also:
 
-- [ドキュメント一覧](README.md)
-- [Capture アーキテクチャ](capture.md)
-- [記録前の安全チェック](privacy-ingress.md)
-- [気づきの整理と実施結果の反映手順](experience-feedback-workflow.md)
-- [Data policy](../DATA_POLICY.md)
+- [Documentation Index](README.md)
+- [Capture Architecture](capture.md)
+- [Privacy Ingress (JA)](privacy-ingress.md)
+- [Experience & Feedback Workflow (JA)](experience-feedback-workflow.md)
+- [Data Policy](../DATA_POLICY.md)
 - [Schema](../SCHEMA.md)
 - [Philosophy](philosophy.md)
-- [Self Observatory GUI ビジョン](self-observatory.md)
+- [Local GUI README](../apps/observatory/README.md)

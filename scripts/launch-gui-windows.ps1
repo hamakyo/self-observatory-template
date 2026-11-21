@@ -1,12 +1,12 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 Set-Location (Resolve-Path (Join-Path $PSScriptRoot '..'))
 
 if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
-    Write-Host 'uv が必要です。README の Windows セットアップ手順を確認してください。'
+    Write-Host 'uv is required. See README.md for setup instructions.'
     exit 1
 }
 if (-not (Get-Command pnpm -ErrorAction SilentlyContinue)) {
-    Write-Host 'pnpm が必要です。README の Windows セットアップ手順を確認してください。'
+    Write-Host 'pnpm is required. See README.md for setup instructions.'
     exit 1
 }
 
@@ -38,12 +38,12 @@ for ($candidate = 8000; $candidate -le 8099; $candidate++) {
     }
 }
 if ($null -eq $port) {
-    Write-Host '8000〜8099番の空きポートがありません。'
+    Write-Host 'No available port found in 8000-8099.'
     exit 1
 }
 
 $url = 'http://127.0.0.1:' + $port
-Write-Host "Self Observatory を $url で起動しています。終了するには Ctrl-C を押してください。"
+Write-Host "Starting Self Observatory at $url -- press Ctrl-C to stop."
 Start-Job -ArgumentList $url -ScriptBlock {
     param($targetUrl)
     for ($attempt = 0; $attempt -lt 60; $attempt++) {
@@ -57,7 +57,7 @@ Start-Job -ArgumentList $url -ScriptBlock {
         catch { }
         Start-Sleep -Seconds 1
     }
-    Write-Error 'APIの起動を確認できませんでした。'
+    Write-Error 'Failed to confirm local API startup.'
 } | Out-Null
 
 & uv run self-observatory serve --port $port --ui-dir apps/observatory/dist

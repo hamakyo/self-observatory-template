@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+test.use({ locale: "ja-JP" });
+
 test("volume shows stable worldlines, every event state, and separate layers", async ({
   page,
   request,

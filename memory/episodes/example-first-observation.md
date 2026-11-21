@@ -25,23 +25,23 @@ source:
   ref: null
 ---
 
-# サンプル：最初の小さな観察を残す
+# Example: Record your first small observation
 
-> これはテンプレートに同梱されている架空のサンプルノートです。自分の記録を書き始めたら削除してかまいません。
+> This is a synthetic starter note bundled with the template. Write your own notes in any language (English, Japanese, etc.) and feel free to delete this file once you get started.
 
 ## Context
 
-Self Observatory を使い始めるとき、最初から完璧な体系や長文を書こうとすると手が止まりやすい。
+When starting a Self Observatory repository, trying to design a complete taxonomy or write a long manifesto up front makes it hard to begin.
 
 ## What happened
 
-まずは 1 つの出来事と短い観察だけを Markdown ノートとして残し、Git にコミットした。
+Committed one small event and a brief observation as a canonical Markdown note in Git.
 
 ## Observation
 
-- 観察（起きた事実）と解釈（自分の考え）を分けて書くと、あとから見返したときに検証しやすい。
-- 1 ノートを小さく保つと、関連ノートとのつながり（`derived_from` / `related`）を追いやすい。
+- Separating observation (what happened) from interpretation (what you think it means) makes notes easier to test later.
+- Keeping each note small makes provenance links (`derived_from` / `related`) easier to trace.
 
 ## Uncertainty
 
-この進め方が長期的に自分に合うかどうかは、数週間運用してみてから見直す。
+Whether this cadence works over several weeks still needs real-world testing.

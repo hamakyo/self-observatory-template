@@ -66,7 +66,14 @@ Flat color, strong typography, clear geometry, and whitespace are preferred.
 
 Avoid slogan structures that sound generically machine-generated.
 
-Especially avoid constructions such as:
+In English, avoid empty hype phrases such as:
+
+- “Unlock the future of …”
+- “Empower your …”
+- “Supercharge your workflow with …”
+- “Not just X — it's Y.”
+
+In Japanese, avoid dramatic-pause slogan constructions such as:
 
 - 「AIが、未来を変える。」
 - 「技術を、もっと身近に。」
@@ -74,7 +81,7 @@ Especially avoid constructions such as:
 - 「○○を、△△へ。」
 - 「○○が、△△。」
 
-Do not insert Japanese commas merely for dramatic rhythm.
+Do not insert punctuation or commas merely for dramatic rhythm.
 
 Prefer direct statements with concrete meaning.
 

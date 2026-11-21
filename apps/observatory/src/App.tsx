@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { query, useLoad, type Schema, type Snapshot } from "./api";
 import { Status } from "./components";
+import { detectLang, dictionaries, LangContext } from "./i18n";
 import {
   dateTime,
   short,
   useUrl,
-  views,
+  viewOrder,
   type Update,
   type View,
 } from "./state";
@@ -34,6 +35,11 @@ export type Context = {
 };
 export function App() {
   const [params, update] = useUrl();
+  const lang = detectLang(params);
+  const t = dictionaries[lang];
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
   const repository = useLoad<Schema["RepositoryResponse"]>(query("repository"));
   const snapshots = useLoad<Schema["SnapshotResponse"]>(
     query("snapshots", { limit: 100 }),
@@ -43,16 +49,18 @@ export function App() {
   const at = params.get("at") || "";
   const note = params.get("note") || "";
   const view = (params.get("view") || "overview") as View;
-  const activeView = view in views ? view : "overview";
+  const activeView: View = (viewOrder as readonly string[]).includes(view)
+    ? view
+    : "overview";
   const showDetail = note && activeView !== "volume";
   const heading =
     activeView === "trajectory"
       ? params.get("evolution") === "observatory"
-        ? "仕組みの変更履歴"
+        ? t.trajectoryHeadings.observatory
         : params.get("evolution") === "all"
-          ? "すべての変更履歴"
-          : "ノートの変更履歴"
-      : views[activeView][0];
+          ? t.trajectoryHeadings.all
+          : t.trajectoryHeadings.self
+      : t.views[activeView][0];
   const overview = useLoad<Schema["OverviewResponse"]>(
     at ? query("overview", { at, as_of: params.get("as_of") }) : null,
     { commit_sha: at },
@@ -84,13 +92,13 @@ export function App() {
   };
   const setAt = (sha: string) => update({ at: sha, as_of: null, cursor: null });
   return (
-    <>
+    <LangContext.Provider value={lang}>
       <a href="#main" className="skip">
-        本文へ移動
+        {t.skipToMain}
       </a>
       <header className="topbar">
         <a
-          href="?view=overview"
+          href={`?view=overview${params.get("lang") ? `&lang=${lang}` : ""}`}
           className="brand"
           onClick={(e) => {
             e.preventDefault();
@@ -112,108 +120,121 @@ export function App() {
           }}
         >
           <label className="sr-only" htmlFor="search">
-            ノートを検索
+            {t.searchLabel}
           </label>
           <input
             id="search"
             type="search"
             value={search}
-            placeholder="キーワードで探す"
+            placeholder={t.searchPlaceholder}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <button type="submit">検索</button>
+          <button type="submit">{t.searchButton}</button>
         </form>
+        <div className="lang-switch" role="group" aria-label={t.languageSwitch}>
+          <button
+            type="button"
+            aria-pressed={lang === "en"}
+            onClick={() => update({ lang: "en" })}
+          >
+            EN
+          </button>
+          <button
+            type="button"
+            aria-pressed={lang === "ja"}
+            onClick={() => update({ lang: "ja" })}
+          >
+            日本語
+          </button>
+        </div>
         <div className="repository">
           <span>
             {repository.status === "ready"
               ? repository.data.repository_name
-              : "読み込み中…"}
+              : t.loading}
           </span>
-          <small>ローカル · 閲覧専用</small>
+          <small>{t.localReadOnly}</small>
         </div>
       </header>
-      {__FIXTURE__ && (
-        <p className="banner warning">
-          開発用のサンプルデータを表示しています。
-        </p>
-      )}
+      {__FIXTURE__ && <p className="banner warning">{t.fixtureBanner}</p>}
       {repository.status === "error" && (
         <Status load={repository}>{() => null}</Status>
       )}
       {repository.status === "ready" &&
         repository.data.index_state !== "ready" && (
           <p className="banner warning" role="status">
-            新しい更新があります。現在は {short(repository.data.indexed_sha)}{" "}
-            時点を表示中です（CLI で索引を更新すると反映されます）。
+            {t.staleIndexBanner(short(repository.data.indexed_sha))}
           </p>
         )}
       {snapshots.status === "error" && (
         <Status load={snapshots}>{() => null}</Status>
       )}
       {snapshots.status === "ready" && snapshots.data.coverage.shallow && (
-        <p className="banner warning">
-          履歴の一部だけ取得されています。これより前の記録は表示できません。
-        </p>
+        <p className="banner warning">{t.shallowBanner}</p>
       )}
       <div
         className={`workspace ${showDetail ? "has-detail" : ""} ${showDetail && params.get("pane") !== "main" ? "show-detail" : ""}`}
       >
-        <nav className="sidebar" aria-label="メインナビゲーション">
-          <p className="eyebrow">メニュー</p>
-          {Object.entries(views).map(([key, value], i) => (
-            <button
-              key={key}
-              aria-current={activeView === key ? "page" : undefined}
-              onClick={() => update({ view: key, cursor: null })}
-            >
-              <span className="nav-number">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span>
-                {value[0]}
-                <small>{value[1]}</small>
-              </span>
-            </button>
-          ))}
+        <nav className="sidebar" aria-label={t.mainNavLabel}>
+          <p className="eyebrow">{t.menuEyebrow}</p>
+          {viewOrder.map((key, i) => {
+            const value = t.views[key];
+            return (
+              <button
+                key={key}
+                aria-current={activeView === key ? "page" : undefined}
+                onClick={() => update({ view: key, cursor: null })}
+              >
+                <span className="nav-number">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span>
+                  {value[0]}
+                  <small>{value[1]}</small>
+                </span>
+              </button>
+            );
+          })}
           <p className="sidebar-foot">
             Markdown + Git
             <br />
-            閲覧専用（編集不可）
+            {t.sidebarReadOnly}
           </p>
         </nav>
         <div className="center">
-          <section className="timebar" aria-label="選択時点">
+          <section className="timebar" aria-label={t.selectedSnapshotLabel}>
             <label className="field">
-              見る時点
+              {t.viewingSnapshot}
               <select
-                aria-label="見る時点"
+                aria-label={t.viewingSnapshot}
                 value={at}
                 onChange={(e) => setAt(e.target.value)}
               >
                 {!current && (
                   <option value={at}>
-                    {at ? `未取得 · ${short(at)}` : "読み込み中…"}
+                    {at ? t.unfetched(short(at)) : t.loading}
                   </option>
                 )}
                 {history.map((s) => (
                   <option key={s.sha} value={s.sha}>
-                    {dateTime(s.committed_at)} · {short(s.sha)} · {s.subject}
+                    {dateTime(s.committed_at, lang)} · {short(s.sha)} ·{" "}
+                    {s.subject}
                   </option>
                 ))}
               </select>
             </label>
             <span className="time-stamp" title={at}>
-              {current ? dateTime(current.committed_at) : "日時不明"}
-              <code>{at ? short(at) : "SHA未取得"}</code>
+              {current ? dateTime(current.committed_at, lang) : t.dateUnknown}
+              <code>{at ? short(at) : t.shaUnavailable}</code>
             </span>
           </section>
           <main id="main" tabIndex={-1}>
             <div className="page-heading">
-              <p className="eyebrow">{views[activeView][1]}</p>
+              <p className="eyebrow">{t.views[activeView][1]}</p>
               <h1>{heading}</h1>
             </div>
             {!at ? (
-              <p role="status">読み込み中…</p>
+              <p role="status">{t.loading}</p>
             ) : activeView === "overview" ? (
               <Overview {...context} />
             ) : activeView === "browse" ? (
@@ -240,14 +261,14 @@ export function App() {
           </main>
         </div>
         {showDetail && at && (
-          <aside className="detail" aria-label="ノート詳細">
+          <aside className="detail" aria-label={t.noteDetailLabel}>
             <Detail key={`${at}:${note}`} {...context} />
           </aside>
         )}
       </div>
       <footer>
-        SELF OBSERVATORY <span>表示は Git の採用履歴にもとづきます</span>
+        SELF OBSERVATORY <span>{t.footerCaption}</span>
       </footer>
-    </>
+    </LangContext.Provider>
   );
 }

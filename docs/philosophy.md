@@ -1,88 +1,87 @@
 # Philosophy
 
-> **A person is not a state. A person is a trajectory through state space.**  
-> **人間とは一つの状態ではなく、状態空間を通過する軌跡である。**
+[English](philosophy.md) | [日本語](ja/philosophy.md)
 
-`self-observatory` は、自己を固定されたプロフィールではなく、連続性と変化の履歴を持つプロセスとして扱います。
+> **A person is not a state. A person is a trajectory through state space.**
 
-## 1. 状態空間と Git の対応
+`self-observatory` treats the self not as a static profile, but as a continuous, versioned process with a history of change.
+
+## 1. State space and Git
 
 ```text
 S₀ → S₁ → S₂ → S₃ → ... → Sₙ
 ```
 
-それぞれの状態 `S` には、記憶・信念・価値観・知識・目標・関係・習慣などが含まれます。  
-大切なのは現在のスナップショット `Sₙ` だけでなく、**ある状態から次の状態へどう変化したか（軌跡）** です。
+Each state `S` holds memories, beliefs, values, knowledge, goals, relationships, and habits.  
+What matters is not just the latest snapshot `Sₙ`, but **the transitions from one state to the next (the trajectory)**.
 
 ```text
-commit  = 状態遷移（state transition）
-tree    = ある時点の状態（state snapshot）
-diff    = 変化（change）
-history = 軌跡（trajectory）
+commit  = state transition
+tree    = state snapshot at a point in time
+diff    = change
+history = trajectory
 ```
 
-このプロジェクトで Git を使う理由は、単なる保存場所としてではなく「変化を通じた連続性」をそのまま表現できるからです。
+Git is used here not merely for storage, but because its commit graph directly models continuity across change.
 
-## 2. 時間的な非還元（1 フレームで人間を決めつけない）
+## 2. Temporal non-reduction (do not collapse a person into one frame)
 
-ある時点の観測は「その状態についての証拠」であって、人間全体への最終判決ではありません。
+An observation at one point in time is evidence about that state, not a final verdict on a whole person.
 
 ```text
 observation(Sₜ) ≠ identity(Person)
 observation(Sₜ) ≠ proof(Sₙ)
 ```
 
-人は同じ人であり続けながら、時間とともに大きく変わります。別々の軸を 1 つのラベルに押し潰さないことが重要です。
+People change substantially while remaining the same continuous person. Avoid collapsing distinct axes into a single static label:
 
-- 過去の行為が有害だったと評価することと、その後の苦痛が本物であることは両立する
-- その後の苦痛が本物であっても、過去の行為を遡って免罪することにはならない
-- 単一の断片だけで「本質的にこういう人だ」と断定せず、反復された証拠と文脈を見る
+- Judging a past action as harmful and recognizing later pain as real can both be true at once.
+- Recognizing later pain does not retroactively excuse past harm.
+- Do not infer fixed essence from a single fragment; look for repeated evidence and context.
 
-> **状態は文脈の中で評価し、軌跡は履歴から読む。1 コマを本質にすり替えない。**
+> **Evaluate a state in context; read a trajectory from history. Never mistake one frame for essence.**
 
-これは自己理解にも、他者理解にも共通する原則です。
+This applies equally to understanding yourself and understanding others.
 
-## 3. 観測は世界への参加を代替しない
+## 3. Observation must not replace participation
 
-自分だけを眺め続けるモデルは、次第に現実から離れて役に立たなくなります。  
-`self-observatory` は常に外部の現実とつながっていなければなりません。
+A model that only looks inward drifts away from reality.  
+`self-observatory` must stay coupled to real-world feedback.
 
 ```text
-観測（observe） → 仮説（hypothesize） → 行動（act） → 反応を受ける（feedback） → 見直す（revise）
+Observe → Hypothesize → Act → Receive feedback → Revise
 ```
 
-分析・抽象化・分類・精緻な自己観測は、「現実から反論される瞬間」を先延ばしにする手段にもなりえます。その歯止めとして次の原則を置きます。
+Over-analyzing, categorizing, and polishing self-models can become a way to postpone contact with reality. To guard against that:
 
-> **Observatory must not replace participation.**  
-> **観測は、世界への参加を代替してはならない。**
+> **Observatory must not replace participation.**
 
-日常でのシンプルな点検質問：
+A simple daily check:
 
-> **今日、現実から Yes / No が返ってくる行動をしたか？**
+> **Did you take an action today that returned a Yes / No signal from reality?**
 
-これは生産性スコアや人間的価値の採点ではありません。Yes でも No でも構わず、「ループが現実とつながっているか」を確かめるための問いです。  
-関連 Playbook：[Reality feedback daily check](../playbooks/life/reality-feedback-daily-check.md)
+This is not a productivity score or moral grade. Whether the answer is Yes or No, the question simply checks whether the loop is still connected to the outside world.
 
-## 4. 記録と設計への帰結
+## 4. Implications for records and design
 
-- **記録の変化 ≠ 本人の変化**：Git が記録するのは「保存されたモデルの変更」です。体験が起きる時期・気づく時期・記録する時期・採用する時期はズレるため、commit 日時で体験時期を代用しません。
-- **過去ツリーの誠実さ**：過去の Git tree には「その時点で記録されていたもの」だけが入ります（後から古い体験を追記しても、過去の時点には遡って現れません）。
-- **失敗と不確実性の価値**：原則や Playbook を使った結果（成功・失敗・効果なし・判断不能）を episode に残し、review でモデルを更新します。失敗や迷いは価値を下げる減点ではなく、判断を良くする証拠です（詳細：[体験時間・整理・実施結果の設計](experience-feedback-design.md)）。
+- **Record changes ≠ personal changes**: Git timestamps record when the model was updated, not when an experience happened. Because experiencing, noticing, recording, and adopting happen at different times, commit dates never substitute for event dates.
+- **Historical honesty**: Past Git trees contain only what was recorded at that time. Backfilling an old experience later does not rewrite past snapshots.
+- **Value of failure and uncertainty**: Real-world outcomes (`success`, `failure`, `no_effect`, `inconclusive`, `pending`) belong in episodes and feed back into reviews. Failure and uncertainty are evidence that improves judgment, not demerits.
 
-このリポジトリが保存したいのは「完成した自己プロフィール」ではなく、次の 5 点です。
+This repository aims to preserve five things rather than a polished self-portrait:
 
-1. 何が変わったか
-2. いつ変わったか
-3. どの経験が変化につながったか
-4. どの考えが `superseded`（置換）されたか
-5. 何がまだ不確かなままか
+1. What changed
+2. When it changed
+3. Which experiences drove the change
+4. Which beliefs were `superseded`
+5. What remains uncertain
 
-## 5. 開いた問い
+## 5. Open questions
 
-以下は単なる哲学的な問いではなく、このリポジトリではスキーマ・由来・状態遷移・対立解消・主体性の設計課題そのものです。
+These are concrete design questions for schemas, provenance, state transitions, and agency:
 
-- 離れた 2 つの状態を「同じ人」とみなす連続性は何か？
-- 繰り返された観察は、どの時点で「文脈」から「自己の一部」になるか？
-- 矛盾する状態同士をどう共存させるか？
-- 何を忘れ、何を圧縮し、何を残すべきか？
-- どの変更を AI が提案し、どの判断を人間だけの決定として残すか？
+- What continuity makes two distant states “the same person”?
+- When does a repeated observation shift from context into part of the self-model?
+- How should contradictory states coexist without premature erasure?
+- What should be forgotten, compressed, or preserved?
+- Which changes may AI propose, and which decisions must remain strictly human?

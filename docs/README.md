@@ -1,41 +1,44 @@
-# ドキュメント案内
+# Documentation Index
 
-`self-observatory` のドキュメント一覧です。目的に合わせて必要な文書から読んでください。
+[English](README.md) | [日本語](ja/README.md)
 
-## まずはここから（思想・全体像）
+Documentation for `self-observatory`. Start with the guide that matches what you need.
 
-| ドキュメント | 内容 |
+## Start here (concept & overview)
+
+| Document | Description |
 | --- | --- |
-| [取扱説明書](how-to-use.md) | 30秒でわかる使い方・書く内容・置き場所 |
-| [Philosophy](philosophy.md) | 「自己は状態ではなく軌跡である」という基本思想 |
-| [Architecture](architecture.md) | 全体構成・サブシステム・AI との境界・2つの進化履歴 |
-| [Roadmap](roadmap.md) | v0.1 から v1.0 までの開発ロードマップと進捗 |
+| [How to Use](how-to-use.md) | 30-second workflow, what to record, and where notes live |
+| [Philosophy](philosophy.md) | Core idea: a person is a trajectory through state space, not a static state |
+| [Architecture](architecture.md) | Subsystems, safety write gate, AI boundaries, and dual evolution histories |
+| [Roadmap (JA)](roadmap.md) | Milestones and progress from v0.1 to v1.0 |
 
-## 日常の記録・運用手順
+## Daily capture & operations
 
-| ドキュメント | 内容 |
+| Document | Description |
 | --- | --- |
-| [Capture アーキテクチャ](capture.md) | ローカル・ChatGPT など複数入口から正本へ至る流れ |
-| [記録前の安全チェック](privacy-ingress.md) | 隔離原本の分類・手動最小化・承認・ステージ検査の手順 |
-| [気づきの整理と実施結果の反映手順](experience-feedback-workflow.md) | Capture 取得 → 提案差分 → 採用 → 実施記録 → 再索引の実手順 |
-| [Media アーキテクチャ](media.md) | `assets/`（実体）と `media/`（意味）の分離・命名・無害化 |
+| [Capture Architecture](capture.md) | How local memos, chat connectors, and imports pass through the same boundary |
+| [Privacy Ingress (JA)](privacy-ingress.md) | Step-by-step local quarantine classification, minimization, approval, and staging checks |
+| [Experience & Feedback Workflow (JA)](experience-feedback-workflow.md) | Practical workflow from Capture import to consolidation PR, trial records, and re-indexing |
+| [Media Architecture (JA)](media.md) | Separating curated sanitized bytes (`assets/`) from semantic notes (`media/`) |
 
-## セキュリティ・境界ルール
+## Security & boundaries
 
-| ドキュメント | 内容 |
+| Document | Description |
 | --- | --- |
-| [Threat Model](threat-model.md) | 守る対象・主なリスク・信頼境界 |
-| [Incident Response](incident-response.md) | 機密情報が混入したときの封じ込め〜再発防止手順 |
+| [Threat Model (JA)](threat-model.md) | Assets to protect, key risks, and trust boundaries |
+| [Incident Response (JA)](incident-response.md) | Containment, cleanup, and prevention if sensitive data enters Git |
 
-> 保存可否の具体的な基準はルートの [DATA_POLICY.md](../DATA_POLICY.md)、エージェント運用ルールは [AGENTS.md](../AGENTS.md)、正本スキーマは [SCHEMA.md](../SCHEMA.md) を参照してください。
+> For concrete storage rules, agent guidelines, and frontmatter definitions, see root [DATA_POLICY.md](../DATA_POLICY.md), [AGENTS.md](../AGENTS.md) ([日本語](ja/AGENTS.md)), and [SCHEMA.md](../SCHEMA.md).
 
-## Self Observatory（閲覧アプリ・設計・API）
+## Self Observatory (local GUI, design & API)
 
-| ドキュメント | 内容 |
+| Document | Description |
 | --- | --- |
-| [Self Observatory GUI ビジョン](self-observatory.md) | 閲覧アプリの全体像と 9 つの視点 |
-| [実装設計](self-observatory-design.md) | ローカルアプリの技術構成・画面構造・段階的リリース計画 |
-| [データ契約](self-observatory-data-contracts.md) | スナップショット・派生索引・関係・差分・外部同期の契約 |
-| [閲覧 API 仕様](self-observatory-api.md) | エンドポイント一覧・Evolution 分類・エラー仕様・配信ルール |
-| [体験時間・整理・実施結果の設計](experience-feedback-design.md) | Issue #39（課題 1〜3）のスキーマ拡張と設計判断 |
-| [Self Time Volume プロトタイプ](self-time-volume.md) | 3D-to-SVG 時空間ビューの契約・描画制約・ベンチマーク結果 |
+| [Local GUI README](../apps/observatory/README.md) | Launching the local app, views, EN/JA switching, and test commands ([日本語](../apps/observatory/README.ja.md)) |
+| [Self Observatory GUI Vision (JA)](self-observatory.md) | Overview and nine perspectives of the read-only local observatory |
+| [Implementation Design (JA)](self-observatory-design.md) | Architecture, UI structure, and phased rollout |
+| [Data Contracts (JA)](self-observatory-data-contracts.md) | Contracts for snapshots, derived index, relations, diffs, and external imports |
+| [Read API Spec (JA)](self-observatory-api.md) | Endpoints, evolution classification, error codes, and serving rules |
+| [Experience & Feedback Design (JA)](experience-feedback-design.md) | Schema extensions and design rationale for temporal precision and feedback |
+| [Self Time Volume Prototype (JA)](self-time-volume.md) | 3D-to-SVG spacetime view contract, rendering limits, and benchmarks |

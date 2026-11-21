@@ -14,20 +14,20 @@ capture_outcomes: []
 maturity_changes: []
 ---
 
-# 整理・再評価の判断
+# Consolidation & review decision
 
-使わない任意属性は削除する。採用する場合は対象と結果を記入し、本人の明示確認後にreview.owner_confirmedとconfirmed_atを追加する。
+Remove unused optional fields. When adopting a change, record the targets and outcomes, then add `review.owner_confirmed` and `confirmed_at` after explicit owner review.
 
-## 対象と入力版
+## Targets and input revisions
 
-## 観察・共通点・相違点
+## Observations, shared structure, and differences
 
-## 判断と理由
+## Decision and rationale
 
-案を却下したことと、Captureを破棄することを区別する。
+Keep rejecting a consolidation proposal distinct from discarding the underlying Capture.
 
-## 反例・不確実性
+## Counterexamples and uncertainty
 
-## 実施結果から変えること
+## Changes motivated by real-world trials
 
-## 再確認する条件
+## Revisit conditions

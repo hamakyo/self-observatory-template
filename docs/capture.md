@@ -1,80 +1,82 @@
-# Capture アーキテクチャ
+# Capture Architecture
 
-> **Capture の入口は差し替え可能だが、正本メモリは差し替え不可。**
+[English](capture.md) | [日本語](ja/capture.md)
 
-気づきはローカルメモ・ChatGPT・外部インポートなどどこから始まっても構いません。  
-ただし、どの入口から来た内容も **同じプライバシー境界とレビュー** を通ってから正本 Markdown になります。
+> **Capture entry points are replaceable; canonical memory is not.**
 
-## 対応している入口
+Observations can start anywhere—local memos, chat conversations, or external imports.  
+Every entry point passes through the **same privacy boundary and review gate** before becoming canonical Markdown.
 
-```text
-                 ┌─ ローカル inbox（_local/inbox/）
-体験・思考 ──────┼─ ChatGPT + GitHub コネクタ（最小化済み Capture Issue）
-                 ├─ Notion インポート（ローカル隔離）
-                 └─ 将来のアプリ / コネクタ
-                          │
-                          ▼
-               プライバシー・機密ゲート
-                          │
-                          ▼
-                   正規化・解釈・整理
-                          │
-                          ▼
-                    正本 Markdown
-```
-
-## ChatGPT + GitHub コネクタの標準ルート
-
-ChatGPT は「会話しながらメモを拾う UI」であり、正本ストアではありません。  
-「self-observatory に残して」「repo にメモして」と頼まれたときの既定ルートは次の通りです。
+## Supported ingress paths
 
 ```text
-会話 → 再利用可能な候補を抽出 → 機密・個人情報チェック → 最小化・匿名化
-  → GitHub Capture Issue → 人間/AI で整理 → Markdown 案 → PR → 正本メモリ
+                         ┌─ Local inbox (_local/inbox/)
+Experience / Thought ────┼─ Chat + GitHub connector (sanitized Capture Issue)
+                         ├─ External memo imports (local quarantine)
+                         └─ Future apps / connectors
+                                  │
+                                  ▼
+                       Privacy & secrets write gate
+                                  │
+                                  ▼
+                    Normalize, interpret & consolidate
+                                  │
+                                  ▼
+                         Canonical Markdown
 ```
 
-### Issue 作成前の必須チェック
+## Standard flow for Chat + GitHub connectors
 
-GitHub Issue は作成した時点でリポジトリに永続化されます。生会話を丸ごとコピーせず、作成前に次を確認します。
+Chat is a conversational UI for spotting lessons, not a canonical store.  
+When asked to capture something into the repository, use this default route:
 
-- 認証情報・パスワード・トークンをすべて除いたか
-- 勤務先・顧客・ベンダーの機密情報を除いたか
-- 第三者の個人情報を最小化したか（不要な氏名・私的 URL・ID・メッセージ引用を除く）
-- 保護対象の原本ではなく「再利用可能な意味」だけを残しているか
-- 安全な表現に迷う場合は、GitHub に送らずローカル隔離に留めているか
+```text
+Conversation → Extract reusable candidate → Secrets & PII check → Minimize & anonymize
+  → GitHub Capture Issue → Human/AI consolidation → Markdown draft → PR → Canonical memory
+```
 
-> ローカルにある隔離ファイルの検査・承認手順は [記録前の安全チェック](privacy-ingress.md) を参照してください。コネクタ経由の Issue 作成はローカル CLI で遮断できないため、作成前の手動確認が必須です。
+### Mandatory checklist before creating an Issue
 
-## Capture Issue の位置づけ
+A GitHub Issue is persisted repository data as soon as it is created. Never paste raw chat transcripts; verify every item first:
 
-Capture Issue は **未解決のオープンループ** であり、まだ正本（確定した事実・原則）ではありません。
+- All credentials, passwords, and tokens are removed
+- Employer, customer, and vendor confidential material is removed
+- Third-party personal information is minimized (remove unnecessary names, private URLs, IDs, and quoted messages)
+- Only the reusable meaning remains, not protected source text
+- Anything uncertain stays in local quarantine instead of GitHub
 
-### Issue に書くとよい項目
+> For local quarantine inspection and approval steps, see [Privacy Ingress (JA)](privacy-ingress.md). Connector-created Issues cannot be intercepted by local CLI hooks, so manual review before creation is mandatory.
 
-- 無害化した観察（何が起きたか）
-- 現時点の解釈
-- 不確実な点（わかっていないこと）
-- なぜ重要そうか
-- 候補となるノート種別（episode / pattern など）
-- 関連しそうな既存ノート ID
+## Role of a Capture Issue
 
-> Issue は episode・pattern・principle 等に育つこともあれば、何も作らず終わることもあります。**Issue を close しただけで「正本化した」とはみなしません。**
+A Capture Issue is an **open loop**, not canonical truth.
 
-取り込み〜提案差分〜採用〜実施フィードバックの具体的な操作手順は [気づきの整理と実施結果の反映手順](experience-feedback-workflow.md) を参照してください。
+### Useful fields to include
 
-## 正本への直接書き込みが許される条件
+- Sanitized observation (what happened)
+- Current interpretation / hypothesis
+- Uncertainty (what is still unknown)
+- Why it may matter
+- Candidate note type (`episode`, `pattern`, etc.)
+- Potentially related existing note IDs
 
-既定は「Capture Issue → レビュー → 正本 Markdown」です。  
-直接の書き込みは次の **4 条件をすべて満たすときだけ** 許可します。
+> An Issue may grow into an episode, pattern, or principle—or be closed without creating a note. **Closing an Issue alone never counts as canonicalization.**
 
-1. オーナーが明示的に直接編集を依頼した
-2. プライバシー・機密ゲートを通過している
-3. 置き場所（意味上の種別）が明確である
-4. 自己像や重要原則を黙って書き換える変更ではない（原則・Playbook・安定パターンの大きな変更は原則 PR）
+For the full consolidation and application feedback workflow, see [Experience & Feedback Workflow (JA)](experience-feedback-workflow.md).
 
-## 出典（Provenance）の残し方
+## When direct writes to canonical Markdown are allowed
 
-ChatGPT の会話から生まれた正本ノートには、私的会話 URL や生ログを書かず、最小化された Capture Issue を参照します。
+The default is `Capture Issue → review → canonical Markdown`.  
+Direct writes are allowed **only when all four conditions hold**:
+
+1. The owner explicitly requested a direct edit
+2. The content passed the privacy and secrets gate
+3. The semantic destination (note type/directory) is clear
+4. It does not silently rewrite core identity or principles (material edits to principles, playbooks, and stable patterns default to PRs)
+
+## Recording provenance
+
+Canonical notes originating from chat conversations should reference the sanitized Capture Issue rather than private chat URLs or raw transcripts:
 
 ```yaml
 source:
@@ -84,4 +86,4 @@ source:
 
 ---
 
-> **会話は豊かで散らかっていてよい。Git に入れるのは、残す価値のある最小限の意味だけ。**
+> **Conversations can be rich and messy. Commit only the minimal reusable meaning worth keeping.**

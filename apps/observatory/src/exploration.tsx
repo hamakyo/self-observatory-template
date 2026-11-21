@@ -2,25 +2,17 @@ import { useEffect, useRef } from "react";
 import type { Context } from "./App";
 import { query, useLoad, type Schema } from "./api";
 import { Empty, NoteList, SafeMarkdown, Select, Status } from "./components";
+import { useI18n } from "./i18n";
 import {
   dateTime,
   fieldLabel,
-  kinds,
+  kindLabel,
   noteTypeLabel,
   record,
   short,
   text,
   type Update,
 } from "./state";
-
-const diagnosticLabels: Record<string, string> = {
-  missing_reference: "この時点に参照先のノートがありません",
-  self_reference: "自分自身を参照しています",
-  relation_cycle: "つながりが循環しています",
-  supersession_status_mismatch: "置き換え関係と状態が一致しません",
-  invalid_note: "形式エラーのため表示から除外",
-  duplicate_id: "ID が重複しているため表示から除外",
-};
 
 function Graph({
   data,
@@ -33,6 +25,7 @@ function Graph({
   update: Update;
   cells: Map<string, number>;
 }) {
+  const { lang, t } = useI18n();
   // Reserve a cell for every encountered ID; changing focus or time does not move it.
   // Follow recorded edges so connected nodes precede isolated records.
   const visible = new Set(data.nodes.map((node) => node.id));
@@ -74,7 +67,7 @@ function Graph({
         viewBox={`0 0 790 ${height}`}
         width="790"
         height={height}
-        aria-label="ノートのつながり図。下のリストからも同じノートを開けます。"
+        aria-label={t.provenance.graphAria}
         role="group"
       >
         <defs>
@@ -111,8 +104,7 @@ function Graph({
               markerEnd={edge.kind === "related" ? undefined : "url(#arrow)"}
             >
               <title>
-                {edge.source_id} {kinds[edge.kind] || edge.kind}{" "}
-                {edge.target_id}
+                {edge.source_id} {kindLabel(edge.kind, lang)} {edge.target_id}
               </title>
             </line>
           );
@@ -125,7 +117,7 @@ function Graph({
               transform={`translate(${p.x},${p.y})`}
               role="button"
               tabIndex={0}
-              aria-label={`${node.title}の詳細を開く`}
+              aria-label={t.provenance.openDetailAria(node.title)}
               aria-pressed={note === node.id}
               onClick={() => update({ note: node.id })}
               onKeyDown={(e) => {
@@ -143,7 +135,7 @@ function Graph({
               </title>
               <rect x="-112" y="-36" width="224" height="72" />
               <text x="-99" y="-13" className="graph-type">
-                {noteTypeLabel(node.frontmatter.type)}
+                {noteTypeLabel(node.frontmatter.type, lang)}
               </text>
               <text x="-99" y="11">
                 {node.title.length > 14
@@ -161,6 +153,7 @@ function Graph({
   );
 }
 export function Provenance({ at, note, update, params }: Context) {
+  const { lang, t } = useI18n();
   const cells = useRef(new Map<string, number>());
   const depth = params.get("depth") === "3" ? 3 : 2;
   const full = params.get("graph") === "all" || !note;
@@ -175,41 +168,37 @@ export function Provenance({ at, note, update, params }: Context) {
   );
   return (
     <>
-      <p className="lede">
-        ノート同士の由来・関連・置き換えを図と一覧でたどります。
-      </p>
+      <p className="lede">{t.provenance.lede}</p>
       <div className="filters">
         <button
           aria-pressed={!full}
           disabled={!note}
           onClick={() => update({ graph: null, depth: "2" })}
         >
-          前後2段
+          {t.provenance.depth2}
         </button>
         <button
           disabled={full || depth === 3}
           onClick={() => update({ depth: "3" })}
         >
-          3段まで広げる
+          {t.provenance.depth3}
         </button>
         <button aria-pressed={full} onClick={() => update({ graph: "all" })}>
-          全体を見る
+          {t.provenance.viewAll}
         </button>
         <button onClick={() => update({ view: "diff", diff_scope: null })}>
-          このノートの差分へ ↗
+          {t.provenance.toNoteDiff}
         </button>
       </div>
-      <p className="legend">実線 → 由来　破線 — 関連　長短破線 → 置き換え</p>
+      <p className="legend">{t.provenance.legend}</p>
       <Status load={graph}>
         {(data) => (
           <>
             {data.truncated && (
-              <p className="message warning">
-                件数が上限を超えたため一部のみ表示しています。
-              </p>
+              <p className="message warning">{t.provenance.truncatedWarning}</p>
             )}
             {!data.nodes.length ? (
-              <Empty>この時点のノートは 0 件です。</Empty>
+              <Empty>{t.overview.zeroNotesAtSnapshot}</Empty>
             ) : (
               <>
                 <Graph
@@ -220,8 +209,10 @@ export function Provenance({ at, note, update, params }: Context) {
                 />
                 <details open>
                   <summary>
-                    リスト表示 · {data.nodes.length} 件 / つながり{" "}
-                    {data.edges.length} 件
+                    {t.provenance.listSummary(
+                      data.nodes.length,
+                      data.edges.length,
+                    )}
                   </summary>
                   <NoteList
                     notes={data.nodes}
@@ -229,7 +220,7 @@ export function Provenance({ at, note, update, params }: Context) {
                     update={update}
                   />
                   {!data.edges.length ? (
-                    <p>つながりはまだありません。</p>
+                    <p>{t.provenance.noEdges}</p>
                   ) : (
                     <ul className="edge-list">
                       {data.edges.map((edge) => (
@@ -243,14 +234,17 @@ export function Provenance({ at, note, update, params }: Context) {
                           </button>
                           <span>
                             {edge.kind === "related" ? "—" : "→"}{" "}
-                            {kinds[edge.kind]}
+                            {kindLabel(edge.kind, lang)}
                           </span>
                           <button
                             onClick={() => update({ note: edge.target_id })}
                           >
                             {edge.target_id}
                           </button>
-                          <small>根拠: {edge.evidence.join(" / ")}</small>
+                          <small>
+                            {t.provenance.evidencePrefix}{" "}
+                            {edge.evidence.join(" / ")}
+                          </small>
                         </li>
                       ))}
                     </ul>
@@ -262,14 +256,17 @@ export function Provenance({ at, note, update, params }: Context) {
         )}
       </Status>
       <section>
-        <h2>チェック結果</h2>
+        <h2>{t.provenance.diagnosticsHeading}</h2>
         <Status load={diagnostics}>
           {(data) =>
             data.items.length ? (
               <ul className="diagnostics">
                 {data.items.map((item, i) => (
                   <li key={i}>
-                    <strong>{diagnosticLabels[item.code] || "注意"}</strong>
+                    <strong>
+                      {t.provenance.diagnostics[item.code] ||
+                        t.provenance.diagnosticFallback}
+                    </strong>
                     <small>{item.code}</small>
                     <span>{item.detail}</span>
                     <small>{item.path}</small>
@@ -277,7 +274,7 @@ export function Provenance({ at, note, update, params }: Context) {
                 ))}
               </ul>
             ) : (
-              <p>問題はありません。</p>
+              <p>{t.provenance.noDiagnostics}</p>
             )
           }
         </Status>
@@ -293,6 +290,7 @@ export function Diff({
   snapshots,
   snapshotsReady,
 }: Context) {
+  const { lang, t } = useI18n();
   const index = snapshots.findIndex((s) => s.sha === at);
   const from =
     params.get("from") ||
@@ -318,33 +316,33 @@ export function Diff({
     (s) =>
       [
         s.sha,
-        `${dateTime(s.committed_at)} · ${short(s.sha)} · ${s.subject}`,
+        `${dateTime(s.committed_at, lang)} · ${short(s.sha)} · ${s.subject}`,
       ] as [string, string],
   );
   const withUnknown = (value: string) =>
     !value
-      ? [["", "読み込み中…"] as [string, string], ...options]
+      ? [["", t.loading] as [string, string], ...options]
       : options.some(([sha]) => sha === value)
         ? options
-        : [[value, `未取得 · ${short(value)}`] as [string, string], ...options];
+        : [[value, t.unfetched(short(value))] as [string, string], ...options];
   return (
     <>
-      <p className="lede">2つの時点を並べて、本文や項目の変化を比べます。</p>
+      <p className="lede">{t.diff.lede}</p>
       <div className="compare-select">
         <Select
-          label="比較前"
+          label={t.diff.from}
           value={from}
           options={withUnknown(from)}
           onChange={(from) => update({ from })}
         />
         <button
-          aria-label="比較前と比較後を入れ替える"
+          aria-label={t.diff.swapAria}
           onClick={() => update({ from: to, to: from })}
         >
-          ⇄ 入替
+          {t.diff.swapButton}
         </button>
         <Select
-          label="比較後"
+          label={t.diff.to}
           value={to}
           options={withUnknown(to)}
           onChange={(to) => update({ to })}
@@ -352,37 +350,37 @@ export function Diff({
       </div>
       <div className="filters">
         <Select
-          label="範囲"
+          label={t.diff.scope}
           value={params.get("diff_scope") || ""}
           options={[
-            ["", note ? "選択中のノート" : "すべて"],
-            ["all", "すべて"],
+            ["", note ? t.diff.selectedNote : t.all],
+            ["all", t.all],
           ]}
           onChange={(diff_scope) => update({ diff_scope })}
         />
         <label className="field">
-          種類
+          {t.diff.type}
           <input
             value={params.get("diff_type") || ""}
-            placeholder="例: episode"
+            placeholder={t.diff.typePlaceholder}
             onChange={(e) => update({ diff_type: e.target.value }, true)}
           />
         </label>
         <label className="field">
-          変更項目
+          {t.diff.changedField}
           <input
             value={params.get("field") || ""}
-            placeholder="例: body / review"
+            placeholder={t.diff.fieldPlaceholder}
             onChange={(e) => update({ field: e.target.value }, true)}
           />
         </label>
         <Select
-          label="変更の種類"
+          label={t.diff.changeKind}
           value={params.get("change") || ""}
           options={[
-            ["", "すべて"],
+            ["", t.all],
             ...["added", "deleted", "renamed", "replaced", "modified"].map(
-              (v) => [v, kinds[v]] as [string, string],
+              (v) => [v, kindLabel(v, lang)] as [string, string],
             ),
           ]}
           onChange={(change) => update({ change })}
@@ -404,8 +402,12 @@ export function Diff({
           return (
             <>
               <p className="result-count">
-                {short(data.from_sha)} → {short(data.to_sha)} · {rows.length}{" "}
-                件（全体 {data.total} 件）
+                {t.diff.resultCount(
+                  short(data.from_sha),
+                  short(data.to_sha),
+                  rows.length,
+                  data.total,
+                )}
               </p>
               {rows.length ? (
                 rows.map((item) => (
@@ -414,32 +416,40 @@ export function Diff({
                       <h2>
                         {text(
                           item.after?.title || item.before?.title || item.id,
+                          lang,
                         )}
                       </h2>
-                      <span className="badge">{kinds[item.kind]}</span>
+                      <span className="badge">
+                        {kindLabel(item.kind, lang)}
+                      </span>
                     </div>
                     <p className="muted">
                       {item.id}
-                      {item.fields?.path && " · 移動あり"}
+                      {item.fields?.path && t.diff.movedSuffix}
                     </p>
                     {item.fields && (
                       <details open>
-                        <summary>変更された項目</summary>
+                        <summary>{t.diff.changedFieldsSummary}</summary>
                         <dl className="field-diff">
                           {Object.entries(item.fields)
                             .filter(([key]) => key !== "body")
                             .map(([key, values]) => (
                               <div key={key}>
-                                <dt>{fieldLabel(key)}</dt>
+                                <dt>{fieldLabel(key, lang)}</dt>
                                 <dd>
-                                  <span>前: {text(values[0])}</span>
-                                  <span>後: {text(values[1])}</span>
+                                  <span>
+                                    {t.diff.beforePrefix}{" "}
+                                    {text(values[0], lang)}
+                                  </span>
+                                  <span>
+                                    {t.diff.afterPrefix} {text(values[1], lang)}
+                                  </span>
                                 </dd>
                               </div>
                             ))}
                         </dl>
                         {Object.hasOwn(item.fields, "body") && (
-                          <p>本文に変更あり</p>
+                          <p>{t.diff.bodyChanged}</p>
                         )}
                       </details>
                     )}
@@ -447,7 +457,11 @@ export function Diff({
                       {(["before", "after"] as const).map((side, i) => (
                         <section key={side}>
                           <div className="section-heading">
-                            <h3>{i === 0 ? "前" : "後"}</h3>
+                            <h3>
+                              {i === 0
+                                ? t.diff.beforeHeading
+                                : t.diff.afterHeading}
+                            </h3>
                             <code>{short(i === 0 ? from : to)}</code>
                           </div>
                           {item[side] ? (
@@ -463,16 +477,16 @@ export function Diff({
                                   })
                                 }
                               >
-                                この時点を開く ↗
+                                {t.diff.openSnapshot}
                               </button>
                               <p className="file-path">
-                                {text(item[side]!.path)}
+                                {text(item[side]!.path, lang)}
                               </p>
                               <SafeMarkdown
                                 body={String(item[side]!.body || "")}
                               />
                               <details>
-                                <summary>属性・出典（JSON）</summary>
+                                <summary>{t.diff.frontmatterSummary}</summary>
                                 <pre>
                                   {JSON.stringify(
                                     item[side]!.frontmatter,
@@ -483,7 +497,7 @@ export function Diff({
                               </details>
                             </>
                           ) : (
-                            <Empty>この時点にはありません。</Empty>
+                            <Empty>{t.diff.absentAtSnapshot}</Empty>
                           )}
                         </section>
                       ))}
@@ -491,7 +505,7 @@ export function Diff({
                   </article>
                 ))
               ) : (
-                <Empty>この条件に一致する変更はありません。</Empty>
+                <Empty>{t.diff.noMatchingChanges}</Empty>
               )}
             </>
           );

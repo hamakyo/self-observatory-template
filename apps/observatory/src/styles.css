@@ -128,6 +128,20 @@ small {
   flex-shrink: 0;
   border-radius: 0 3px 3px 0;
 }
+.lang-switch {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.lang-switch button {
+  padding: 6px 10px;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  border-radius: 3px 0 0 3px;
+}
+.lang-switch button + button {
+  border-left: 0;
+  border-radius: 0 3px 3px 0;
+}
 .repository {
   text-align: right;
   font-size: 11px;

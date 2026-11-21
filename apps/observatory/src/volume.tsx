@@ -2,9 +2,10 @@ import { useMemo, useRef, useState } from "react";
 import type { Context } from "./App";
 import { query, useLoad, type Schema } from "./api";
 import { Empty, Select, Status } from "./components";
+import { useI18n } from "./i18n";
 import {
   dateTime,
-  kinds,
+  kindLabel,
   maturityLabel,
   noteTypeLabel,
   short,
@@ -16,14 +17,6 @@ type Slice = Schema["VolumeSlice"];
 type Point = Schema["VolumePoint"];
 type Event = { slice: Slice; point: Point };
 type Camera = { yaw: number; tilt: number; zoom: number };
-const states: Record<Point["state"], string> = {
-  added: "追加",
-  modified: "更新・移動",
-  superseded: "置き換え",
-  deleted: "削除",
-  unchanged: "継続",
-  unavailable: "読込エラー",
-};
 
 // Form runs before filtering so hidden slices cannot reconnect deleted records.
 function worldlines(slices: Slice[]) {
@@ -77,6 +70,7 @@ function Scene({
   camera: Camera;
   setCamera: (value: Partial<Camera>) => void;
 }) {
+  const { lang, t } = useI18n();
   const { yaw, tilt, zoom } = camera;
   const setYaw = (yaw: number) => setCamera({ yaw });
   const setTilt = (tilt: number) => setCamera({ tilt });
@@ -132,9 +126,9 @@ function Scene({
     <>
       <div className="volume-camera">
         <label className="field">
-          回転 {Math.round(yaw)}°
+          {t.volume.yaw(Math.round(yaw))}
           <input
-            aria-label="空間の回転"
+            aria-label={t.volume.yawAria}
             type="range"
             min="-180"
             max="180"
@@ -143,9 +137,9 @@ function Scene({
           />
         </label>
         <label className="field">
-          傾き {Math.round(tilt)}°
+          {t.volume.tilt(Math.round(tilt))}
           <input
-            aria-label="空間の傾き"
+            aria-label={t.volume.tiltAria}
             type="range"
             min="10"
             max="75"
@@ -154,9 +148,9 @@ function Scene({
           />
         </label>
         <label className="field">
-          拡大 {zoom}%
+          {t.volume.zoom(zoom)}
           <input
-            aria-label="空間の倍率"
+            aria-label={t.volume.zoomAria}
             type="range"
             min="60"
             max="160"
@@ -171,14 +165,14 @@ function Scene({
             setZoom(100);
           }}
         >
-          視点を戻す
+          {t.volume.resetCamera}
         </button>
       </div>
       <svg
         className="time-volume"
         viewBox="0 0 900 600"
         role="group"
-        aria-label="立体履歴ビュー。下の時点・ノート一覧からも同じ操作ができます。"
+        aria-label={t.volume.sceneAria}
         onPointerDown={(e) => {
           if (e.pointerType !== "mouse" || e.button !== 0) return;
           drag.current = { x: e.clientX, y: e.clientY, yaw, tilt };
@@ -229,10 +223,10 @@ function Scene({
           </marker>
         </defs>
         <text x="22" y="30" className="volume-axis-label">
-          更新順 ↑
+          {t.volume.axisOrder}
         </text>
         <text x="22" y="575" className="volume-axis-label">
-          ノート配置（固定）
+          {t.volume.axisLayout}
         </text>
         {slices.map((s) => {
           const p = s.snapshot.position;
@@ -257,7 +251,7 @@ function Scene({
                 className="volume-slice-label"
                 role="button"
                 tabIndex={-1}
-                aria-label={`${short(s.snapshot.sha)}の時点を表示`}
+                aria-label={t.volume.sliceAria(short(s.snapshot.sha))}
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => choose(s.snapshot.sha)}
               >
@@ -305,7 +299,7 @@ function Scene({
                   }
                 >
                   <title>
-                    {kinds[e.kind]}: {e.source_id} → {e.target_id} ·{" "}
+                    {kindLabel(e.kind, lang)}: {e.source_id} → {e.target_id} ·{" "}
                     {e.evidence.join(", ")}
                   </title>
                 </line>
@@ -333,14 +327,14 @@ function Scene({
                   transform={`translate(${p.x} ${p.y})`}
                   role="button"
                   tabIndex={-1}
-                  aria-label={`${short(s.snapshot.sha)}の仕組み変更`}
+                  aria-label={t.volume.obsChangeAria(short(s.snapshot.sha))}
                   onPointerDown={(e) => e.stopPropagation()}
                   onClick={() => choose(s.snapshot.sha)}
                 >
                   <circle r="5" />
                   {i === rail.length - 1 && (
                     <text x="12" y="4">
-                      仕組み
+                      {t.volume.obsRailLabel}
                     </text>
                   )}
                   <title>
@@ -362,7 +356,7 @@ function Scene({
             className={`volume-point state-${point.state} ${selected === point.id ? "selected" : selected ? "dimmed" : ""}`}
             role="button"
             tabIndex={slice.snapshot.sha === selectedSha ? 0 : -1}
-            aria-label={`${point.title} · ${states[point.state]} · ${short(slice.snapshot.sha)}`}
+            aria-label={`${point.title} · ${t.volume.states[point.state] || point.state} · ${short(slice.snapshot.sha)}`}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={() => choose(slice.snapshot.sha, point.id)}
             onKeyDown={(e) => {
@@ -373,19 +367,16 @@ function Scene({
             }}
           >
             <title>
-              {point.title} · {point.id} · {states[point.state]} ·{" "}
-              {statusLabel(point.status)}
+              {point.title} · {point.id} ·{" "}
+              {t.volume.states[point.state] || point.state} ·{" "}
+              {statusLabel(point.status, lang)}
             </title>
             <Mark state={point.state} />
           </g>
         ))}
       </svg>
-      <p className="legend">
-        ● 追加　◆ 更新・移動　△ 置き換え　× 削除　○ 継続　? 読込エラー
-      </p>
-      <p className="muted">
-        縦の線は同じノートのつながり、平面の線は関連を示します。
-      </p>
+      <p className="legend">{t.volume.legend}</p>
+      <p className="muted">{t.volume.axisHint}</p>
     </>
   );
 }
@@ -401,6 +392,7 @@ function VolumeContent({
   camera: Camera;
   setCamera: (value: Partial<Camera>) => void;
 }) {
+  const { lang, t } = useI18n();
   const { params, update, snapshots } = context;
   const evolution = ["self", "observatory"].includes(
     params.get("volume_layer") || "",
@@ -452,53 +444,59 @@ function VolumeContent({
   return (
     <>
       <p className="volume-coverage">
-        {c.returned_snapshots} / {c.requested_snapshots} 時点 ·{" "}
-        {c.returned_notes} / {c.total_notes} ノート · 配置 v
-        {data.layout_version} / 解析 v{data.parser_version}
+        {t.volume.coverage(
+          c.returned_snapshots,
+          c.requested_snapshots,
+          c.returned_notes,
+          c.total_notes,
+          data.layout_version,
+          data.parser_version,
+        )}
       </p>
       {truncated && (
         <p className="message warning">
-          件数が多いため一部を省略しています（
-          {c.requested_snapshots - c.returned_snapshots} 時点 /{" "}
-          {c.total_notes - c.returned_notes} ノート / つながり {c.omitted_edges}{" "}
-          件）。範囲を絞るか ID を指定してください。
+          {t.volume.truncatedWarning(
+            c.requested_snapshots - c.returned_snapshots,
+            c.total_notes - c.returned_notes,
+            c.omitted_edges,
+          )}
         </p>
       )}
       {c.excluded_notes > 0 && (
         <p className="message warning">
-          読み込めなかった記録が延べ {c.excluded_notes} 件あります。
+          {t.volume.excludedWarning(c.excluded_notes)}
         </p>
       )}
       <div className="filters volume-filters">
         <Select
-          label="表示する層"
+          label={t.volume.layerLabel}
           value={evolution}
           options={[
-            ["all", "すべて"],
-            ["self", "ノートのみ"],
-            ["observatory", "仕組みのみ"],
+            ["all", t.all],
+            ["self", t.volume.layerSelf],
+            ["observatory", t.volume.layerObservatory],
           ]}
           onChange={(volume_layer) => update({ volume_layer })}
         />
         <Select
-          label="つながり"
+          label={t.volume.relationLabel}
           value={relation}
           options={[
-            ["all", "すべて"],
-            ["derived_from", "由来"],
-            ["related", "関連"],
-            ["supersedes", "置き換え"],
-            ["none", "表示しない"],
+            ["all", t.all],
+            ["derived_from", kindLabel("derived_from", lang)],
+            ["related", kindLabel("related", lang)],
+            ["supersedes", kindLabel("supersedes", lang)],
+            ["none", t.volume.relationHide],
           ]}
           onChange={(volume_relation) => update({ volume_relation })}
         />
         <Select
-          label="注目するノート"
+          label={t.volume.focusNoteLabel}
           value={id}
           options={[
-            ["", "選択なし"],
+            ["", t.volume.noSelection],
             ...(!ids.has(id) && id
-              ? [[id, `${id}（この範囲になし）`] as [string, string]]
+              ? [[id, t.volume.outOfRangeNote(id)] as [string, string]]
               : []),
             ...[...ids].map(
               ([key, title]) => [key, `${title} · ${key}`] as [string, string],
@@ -508,7 +506,7 @@ function VolumeContent({
         />
       </div>
       {!selected ? (
-        <Empty>この範囲に該当する変更はありません。</Empty>
+        <Empty>{t.volume.emptyRange}</Empty>
       ) : (
         <>
           <Scene
@@ -531,24 +529,24 @@ function VolumeContent({
             setCamera={setCamera}
           />
           <section className="volume-selection">
-            <h2>選択中の時点</h2>
+            <h2>{t.volume.selectedSnapshotHeading}</h2>
             <div className="filters">
               <button
                 disabled={index <= 0}
                 onClick={() => choose(visible[index - 1].snapshot.sha)}
               >
-                前へ
+                {t.volume.prev}
               </button>
               <button
                 disabled={index >= visible.length - 1}
                 onClick={() => choose(visible[index + 1].snapshot.sha)}
               >
-                次へ
+                {t.volume.next}
               </button>
               <label className="field">
-                時間スライダー
+                {t.volume.timeSlider}
                 <input
-                  aria-label="時間軸の時点"
+                  aria-label={t.volume.timeSliderAria}
                   type="range"
                   min="0"
                   max={visible.length - 1}
@@ -559,11 +557,11 @@ function VolumeContent({
                 />
               </label>
               <Select
-                label="時点を選ぶ"
+                label={t.volume.chooseSnapshot}
                 value={selected.snapshot.sha}
                 options={visible.map((s) => [
                   s.snapshot.sha,
-                  `${dateTime(s.snapshot.committed_at)} · ${short(s.snapshot.sha)}`,
+                  `${dateTime(s.snapshot.committed_at, lang)} · ${short(s.snapshot.sha)}`,
                 ])}
                 onChange={(sha) => choose(sha)}
               />
@@ -584,21 +582,21 @@ function VolumeContent({
                   })
                 }
               >
-                この時点の一覧へ
+                {t.volume.browseAtSnapshot}
               </button>
               <button
                 disabled={!point?.read_sha}
                 onClick={() => open("browse")}
               >
                 {point?.present === false
-                  ? "直前の本文を読む"
-                  : "このノートを読む"}
+                  ? t.volume.readPreviousBody
+                  : t.volume.readThisNote}
               </button>
               <button
                 disabled={!point?.read_sha}
                 onClick={() => open("provenance")}
               >
-                つながりを見る
+                {t.detail.viewProvenance}
               </button>
               <button
                 disabled={
@@ -619,14 +617,15 @@ function VolumeContent({
                   })
                 }
               >
-                直前との差分
+                {t.trajectory.diffFromParent}
               </button>
             </div>
             {selected.snapshot.observatory_changed && evolution !== "self" && (
               <details className="volume-observatory-paths">
                 <summary>
-                  仕組みの変更ファイル ·{" "}
-                  {selected.snapshot.observatory_change_paths.length} 件
+                  {t.volume.obsChangedFiles(
+                    selected.snapshot.observatory_change_paths.length,
+                  )}
                 </summary>
                 <ul>
                   {selected.snapshot.observatory_change_paths.map((path) => (
@@ -638,15 +637,13 @@ function VolumeContent({
               </details>
             )}
             {selected.snapshot.change_basis === "unavailable" && (
-              <p className="message">
-                比較元がないため、この時点の変更は判定できません。
-              </p>
+              <p className="message">{t.volume.unavailableBasis}</p>
             )}
             {evolution !== "observatory" && (
               <details>
-                <summary>この時点のノート一覧</summary>
+                <summary>{t.volume.notesAtSnapshot}</summary>
                 {selected.points.length === 0 ? (
-                  <Empty>この時点に表示できるノートはありません。</Empty>
+                  <Empty>{t.volume.noNotesAtSnapshot}</Empty>
                 ) : (
                   <ul className="volume-note-list">
                     {selected.points.map((p) => (
@@ -658,9 +655,12 @@ function VolumeContent({
                           {p.title}
                         </button>
                         <span>
-                          {states[p.state]} · {noteTypeLabel(p.type)} ·{" "}
-                          {statusLabel(p.status)}
-                          {p.maturity ? ` · ${maturityLabel(p.maturity)}` : ""}
+                          {t.volume.states[p.state] || p.state} ·{" "}
+                          {noteTypeLabel(p.type, lang)} ·{" "}
+                          {statusLabel(p.status, lang)}
+                          {p.maturity
+                            ? ` · ${maturityLabel(p.maturity, lang)}`
+                            : ""}
                         </span>
                       </li>
                     ))}
@@ -672,8 +672,10 @@ function VolumeContent({
                     .map((e) => (
                       <li key={`${e.kind}:${e.source_id}:${e.target_id}`}>
                         {e.source_id} {e.kind === "related" ? "—" : "→"}{" "}
-                        {e.target_id} · {kinds[e.kind]}
-                        <small>根拠: {e.evidence.join(" / ")}</small>
+                        {e.target_id} · {kindLabel(e.kind, lang)}
+                        <small>
+                          {t.provenance.evidencePrefix} {e.evidence.join(" / ")}
+                        </small>
                       </li>
                     ))}
                 </ul>
@@ -684,9 +686,9 @@ function VolumeContent({
       )}
       {id && evolution !== "observatory" && (
         <section className="volume-history">
-          <h2>ノートの履歴 · {id}</h2>
+          <h2>{t.volume.noteHistoryHeading(id)}</h2>
           {!events.length ? (
-            <Empty>この範囲にこのノートの記録はありません。</Empty>
+            <Empty>{t.volume.noNoteHistory}</Empty>
           ) : (
             <ol>
               {events.map(({ slice, point: p }) => (
@@ -699,12 +701,13 @@ function VolumeContent({
                       })
                     }
                   >
-                    {dateTime(slice.snapshot.committed_at)} ·{" "}
+                    {dateTime(slice.snapshot.committed_at, lang)} ·{" "}
                     {short(slice.snapshot.sha)}
                   </button>
                   <span>
-                    {states[p.state]} · {statusLabel(p.status)}
-                    {p.maturity ? ` · ${maturityLabel(p.maturity)}` : ""}
+                    {t.volume.states[p.state] || p.state} ·{" "}
+                    {statusLabel(p.status, lang)}
+                    {p.maturity ? ` · ${maturityLabel(p.maturity, lang)}` : ""}
                   </span>
                 </li>
               ))}
@@ -717,6 +720,7 @@ function VolumeContent({
 }
 
 export function TimeVolume(context: Context) {
+  const { lang, t } = useI18n();
   const { params, update, at, snapshots } = context;
   const from = params.get("volume_from") || "",
     to = params.get("volume_to") || at;
@@ -734,28 +738,26 @@ export function TimeVolume(context: Context) {
   const [inputId, setInputId] = useState(focus);
   const options = snapshots.map(
     (s) =>
-      [s.sha, `${dateTime(s.committed_at)} · ${short(s.sha)}`] as [
+      [s.sha, `${dateTime(s.committed_at, lang)} · ${short(s.sha)}`] as [
         string,
         string,
       ],
   );
   const toOptions = options.some(([sha]) => sha === to)
     ? options
-    : [[to, `未取得 · ${short(to)}`] as [string, string], ...options];
+    : [[to, t.unfetched(short(to))] as [string, string], ...options];
   return (
     <>
-      <p className="lede">
-        ノートの変化を時系列に重ねて見る試作ビューです（奥行きが更新順）。
-      </p>
+      <p className="lede">{t.volume.lede}</p>
       <div className="filters volume-range">
         <Select
-          label="開始時点"
+          label={t.volume.startSnapshot}
           value={from}
-          options={[["", "最新24時点"], ...options]}
+          options={[["", t.volume.latest24], ...options]}
           onChange={(volume_from) => update({ volume_from, volume_at: null })}
         />
         <Select
-          label="終了時点"
+          label={t.volume.endSnapshot}
           value={to}
           options={toOptions}
           onChange={(volume_to) => update({ volume_to, volume_at: null })}
@@ -771,15 +773,15 @@ export function TimeVolume(context: Context) {
           }}
         >
           <label className="field">
-            ノート ID を指定
+            {t.volume.specifyNoteId}
             <input
-              aria-label="空間で探すID"
+              aria-label={t.volume.specifyNoteIdAria}
               value={inputId}
               onChange={(e) => setInputId(e.target.value)}
-              placeholder="表示上限外も指定可"
+              placeholder={t.volume.specifyNotePlaceholder}
             />
           </label>
-          <button type="submit">探す</button>
+          <button type="submit">{t.volume.findButton}</button>
         </form>
       </div>
       <Status load={volume}>
@@ -792,7 +794,7 @@ export function TimeVolume(context: Context) {
           />
         )}
       </Status>
-      <p className="muted">仕組みの更新はノート内容の変化とは別です。</p>
+      <p className="muted">{t.volume.footerNote}</p>
     </>
   );
 }

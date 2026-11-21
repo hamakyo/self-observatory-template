@@ -17,20 +17,20 @@ source:
   ref: null
 ---
 
-# 試した記録
+# Application record
 
-実施済みの行動だけをここに記録する。時期と使った版は分かる範囲で記入し、仮の日付や現在のSHAで補わない。
+Record only actions actually taken. Fill in event timing and applied commit SHA only when known; never fabricate a placeholder date or substitute HEAD.
 
-## 仮説・確かめたいこと
+## Hypothesis / what to test
 
-## 行動と適用条件
+## Action and conditions
 
-## 観察した反応
+## Observed reaction
 
-## 結果の解釈
+## Interpretation of outcome
 
-成功・失敗・効果なし・判断不能・結果待ちを区別する。
+Distinguish between `success`, `failure`, `no_effect`, `inconclusive`, and `pending`.
 
-## 不確実性
+## Uncertainty
 
-## 次に変えること
+## What to adjust next

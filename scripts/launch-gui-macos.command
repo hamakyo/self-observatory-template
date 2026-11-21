@@ -5,13 +5,13 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 if ! command -v uv >/dev/null 2>&1; then
-  echo "uv が必要です。https://docs.astral.sh/uv/getting-started/installation/ からインストールしてください。"
-  read -r -p "Enterキーで終了します。"
+  echo "uv is required. Install it from https://docs.astral.sh/uv/getting-started/installation/"
+  read -r -p "Press Enter to close."
   exit 1
 fi
 if ! command -v pnpm >/dev/null 2>&1; then
-  echo "pnpm が必要です。Node.js 22.12以上と pnpm 9.15.4 をインストールしてください。"
-  read -r -p "Enterキーで終了します。"
+  echo "pnpm is required. Install Node.js 22.12+ and pnpm 9.15.4."
+  read -r -p "Press Enter to close."
   exit 1
 fi
 
@@ -22,5 +22,5 @@ pnpm build
 
 uv run self-observatory index --rebuild
 (sleep 2; open http://127.0.0.1:8000) >/dev/null 2>&1 &
-echo "Self Observatory を http://127.0.0.1:8000 で起動しています。終了するには Control-C を押してください。"
+echo "Starting Self Observatory at http://127.0.0.1:8000 — press Control-C to stop."
 uv run self-observatory serve --port 8000 --ui-dir apps/observatory/dist

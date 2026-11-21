@@ -22,15 +22,15 @@ source:
   ref: null
 ---
 
-# サンプル：小さく残して、繰り返されたら原則にする
+# Example: Start small and promote principles from repeated evidence
 
-> 1 回の出来事だけで結論を固定せず、観察を積み重ねてから原則へ昇格させる。
+> Do not freeze a conclusion from a single event; gather observations before promoting a rule into a principle.
 
-> これはテンプレートに同梱されている架空のサンプルノートです。自分の記録を書き始めたら削除してかまいません。
+> This is a synthetic starter note bundled with the template. Feel free to delete it once you start adding your own notes.
 
 ## Why
 
-一度きりの出来事や気分から大きなルールを作ると、前提が変わったときに実態とずれやすい。
+Turning a one-off event or passing mood into a rigid rule quickly drifts away from reality when context changes.
 
 ## Evidence
 
@@ -38,4 +38,4 @@ source:
 
 ## Limits
 
-安全やプライバシーに関わる明確な禁止事項（秘密情報をコミットしない等）は、観察の積み重ねを待たずに最初からルールとして固定する。
+Hard safety and privacy boundaries (such as never committing credentials or confidential material) apply immediately without waiting for repeated episodes.

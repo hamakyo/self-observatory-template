@@ -57,13 +57,16 @@ def validate_temporal(value, *, endpoint=False) -> dict:
     return result
 
 
-def temporal_label(value: dict | None) -> str:
+def temporal_label(value: dict | None, lang: str = "ja") -> str:
     if value is None:
-        return "未記録"
+        return "Unrecorded" if lang == "en" else "未記録"
     if value["precision"] == "unknown":
-        return "時期不明"
+        return "Unknown" if lang == "en" else "時期不明"
     if value["precision"] == "range":
-        return f'{temporal_label(value["start"])}〜{temporal_label(value["end"])}'
+        sep = " – " if lang == "en" else "〜"
+        return f'{temporal_label(value["start"], lang=lang)}{sep}{temporal_label(value["end"], lang=lang)}'
+    if lang == "en":
+        return value["value"]
     parts = value["value"].split("-")
     return "".join(f"{int(part)}{unit}" for part, unit in zip(parts, ("年", "月", "日")))
 

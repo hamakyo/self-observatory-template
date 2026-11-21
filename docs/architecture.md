@@ -1,10 +1,12 @@
 # Architecture
 
-`self-observatory` の全体構造、各サブシステムの役割、安全ゲート、AI との境界、そして 2 つの進化履歴（Self / Observatory）をまとめた文書です。
+[English](architecture.md) | [日本語](ja/architecture.md)
 
-## 基本構造
+This document summarizes the overall architecture of `self-observatory`, its subsystems, privacy write gate, AI boundaries, and the separation between Self Evolution and Observatory Evolution.
 
-`self-observatory` は「静的なプロフィール」ではなく、**履歴を持つプロセスとしての自己**をバージョン管理します。
+## Core model
+
+`self-observatory` versions the self as a process with history rather than a static profile.
 
 ```text
 experience → capture → episode → pattern → principle → playbook → action → reflection
@@ -12,94 +14,89 @@ experience → capture → episode → pattern → principle → playbook → ac
      └────────────────────────── new experience ──────────────────────────────┘
 ```
 
-## サブシステム
+## Subsystems
 
-| サブシステム | 置き場所 | 役割 |
+| Subsystem | Location | Role |
 | --- | --- | --- |
-| **Action OS** | GitHub Issues / Projects / Milestones | 進行中の課題（open loop）を管理する |
-| **Memory OS** | `memory/` | 永続的なエピソード・知識・影響（influences）・パターン・原則を保存する |
-| **Decision OS** | `decisions/` | 意思決定の理由・トレードオフ・再検討条件を残す |
-| **Playbooks** | `playbooks/` | 繰り返す状況に対する実行可能な手順を置く |
-| **Media** | `assets/` + `media/` | 実体バイナリと意味の Markdown を分離し、検索可能に保つ |
-| **Reflection** | `reviews/` | 最近の経験と既存知識を照合し、必要なら PR で更新を提案する |
-| **Self Observatory** | `src/` + `apps/observatory/` | Git 履歴から再生成できる閲覧専用アプリ（正本ではない） |
+| **Action OS** | GitHub Issues / Projects / Milestones | Track active open loops |
+| **Memory OS** | `memory/` | Store durable episodes, knowledge, influences, patterns, and principles |
+| **Decision OS** | `decisions/` | Record decisions, trade-offs, and revisit triggers |
+| **Playbooks** | `playbooks/` | Executable procedures for recurring situations |
+| **Media** | `assets/` + `media/` | Separate sanitized binary files from searchable semantic Markdown |
+| **Reflection** | `reviews/` | Reconcile recent experiences with existing notes and propose PR updates |
+| **Self Observatory** | `src/` + `apps/observatory/` | Rebuildable, read-only local viewing app (not source of truth) |
 
-### Self Observatory の 4 つの中心視点
+### Four core perspectives in Self Observatory
 
-- **Trajectory**：自己モデルが時間とともにどう変わったか
-- **Provenance**：なぜその原則や手順が存在するのか
-- **Parallel Selves**：PR 履歴に残る「選ばれなかった可能性」
-- **Contradictions**：無理に解消せず観測し続ける緊張関係
+- **Trajectory**: How the self-model changed over time
+- **Provenance**: Why a principle or playbook exists
+- **Parallel Selves**: Unchosen paths preserved in PR history
+- **Contradictions**: Tensions observed without forcing premature resolution
 
-補助ビューとして Self Diff、Review Radar、Memory Weather、Memory Metabolism、Life Constellation を位置づけています。  
-UI は注意候補を示すだけで、**status・maturity・確認状態・自己像を黙って書き換えません**。
+Supporting views include Diff, Review Queue, Experiences, Consolidation, Applications, and Time Volume.  
+The UI highlights items for attention and **never silently mutates status, maturity, confirmation state, or identity**.
 
-- 関連設計：[GUI ビジョン](self-observatory.md) / [実装設計](self-observatory-design.md) / [データ契約](self-observatory-data-contracts.md)
-- 体験時間・整理・実施結果：[設計](experience-feedback-design.md) / [運用手順](experience-feedback-workflow.md)
+## Capture ingress and safety gate
 
-## Capture の入口と安全ゲート
-
-Capture の入口は 1 つに固定しませんが、**すべて同じプライバシー・レビュー境界を通過してから正本に入ります**。
+Capture supports multiple entry points, and **every entry passes through the same privacy and review boundary before entering canonical Markdown**:
 
 ```text
-Capture の入口
-├── _local/inbox/（ローカルメモ）
-├── ChatGPT + GitHub コネクタ（最小化済み Capture Issue）
-├── Notion インポート（ローカル隔離）
-└── 将来のアプリ / コネクタ
+Capture ingress
+├── _local/inbox/ (local memos)
+├── Chat + GitHub connector (sanitized Capture Issue)
+├── External memo imports (local quarantine)
+└── Future apps / connectors
 ```
 
 ```text
-Capture / Import → privacy classifier → 修正候補 → 人間レビュー → 正規化 → 正本 Git 書き込み
+Capture / Import → privacy classifier → redaction candidates → human review → normalization → canonical Git
 ```
 
-- ChatGPT は会話フロントエンドであり、生ログをそのまま GitHub へコピーしません（`会話 → 最小化 → Capture Issue → レビュー → 正本 Markdown` が既定）。
-- privacy classifier はリスク検知と修正案の提示までを担当し、**保存許可の判断は人間が行います**。迷う場合はローカル隔離に残します。
-- ローカル安全ゲートの実手順は [記録前の安全チェック](privacy-ingress.md)、Capture の詳細は [Capture アーキテクチャ](capture.md) を参照してください。
+- Chat tools act as conversational frontends, never raw sinks into Git (`conversation → minimize → Capture Issue → review → canonical Markdown`).
+- The privacy classifier detects risk and proposes redactions; **the human decides what is safe to persist**. Uncertain material stays in local quarantine.
+- See [Capture Architecture](capture.md) and [Privacy Ingress (JA)](privacy-ingress.md).
 
-## 正本と派生物の境界
+## Source of truth vs. derived artifacts
 
 ```text
-正本：Git + Markdown + 無害化済み assets/
-  ├── 派生インデックス（SQLite / Graphiti / Gortex / codebase-memory-mcp / 埋め込み）
-  ├── 閲覧 UI（Self Observatory） / 生成 PDF
-  ├── 大容量メディア用の外部 Object Storage（将来オプション）
-  └── AI エージェントからの検索
+Source of truth: Git + Markdown + sanitized assets/
+  ├── Derived indexes (SQLite / graphs / embeddings)
+  ├── Local read-only UI (Self Observatory) / generated exports
+  ├── Optional external object storage for large media bytes
+  └── AI agent retrieval
 ```
 
-- stable ID と意味の正本は常に Git に残します。派生インデックスはすべて削除後に再構築できる設計とします。
-- 大容量メディアの実体だけを外部ストレージへ移す場合も、`media/` の意味ノートと stable ID は Git 側に残します。
+- Stable IDs and semantic records always stay in Git. Every derived index is designed to be deleted and rebuilt cleanly.
+- Even if large binary media moves to external storage later, its semantic note under `media/` and stable ID stay in Git.
 
-## AI との境界
+## AI boundaries
 
-| AI がやってよいこと | AI が黙ってやってはいけないこと |
+| AI may do | AI must never do silently |
 | --- | --- |
-| 関連メモの検索・パターン候補の抽出・リンク提案 | 自己像（identity）の勝手な再定義 |
-| 原則・Playbook・置換（supersession）・振り返り PR の下書き | 矛盾の上書き・由来の消去 |
-| メディアの説明案・プライバシーリスク分類と赤入れ案の作成 | 単一エピソードの安定原則（`stable`）への昇格 |
-| 最小化済み Capture Issue の作成（コネクタ経由） | 人間確認なしでの保護データ承認・生会話の丸投げコピー |
+| Search notes, extract pattern candidates, suggest links | Redefine the owner's identity |
+| Draft PRs for principles, playbooks, supersessions, and reviews | Overwrite contradictions or erase provenance |
+| Draft media descriptions, privacy classifications, and redactions | Promote a single episode straight to `stable` principle |
+| Create sanitized Capture Issues via connectors | Approve protected data without human review or dump raw chats |
 
-> 自己モデルに関わる重要な変更は、レビュー可能な Pull Request で提案します。
+> Material changes to the self-model go through reviewable Pull Requests.
 
-## イベントソーシングと 2 つの進化履歴
+## Event sourcing and dual evolution histories
 
-Git コミットは状態遷移の記録であり、現在の `HEAD` は履歴の投影にすぎません。`superseded` になった古い考えも履歴からいつでも確認できます。
+Git commits represent state transitions; `HEAD` is simply the latest projection. Superseded ideas remain inspectable in history.
 
-### Self Evolution と Observatory Evolution
+### Self Evolution vs. Observatory Evolution
 
-同じ Git 履歴の中にある **「自己モデルの変化」と「観測システム自体の変化」を明確に分けます**。
+Within the same Git repository, **changes to the self-model are separated from changes to the observatory tooling itself**:
 
 ```text
-現実・体験 → Self Model（正本ノート） → Observatory Model（仕組み・スキーマ・索引） → GUI 投影
+Reality / Experience → Self Model (canonical notes) → Observatory Model (code, schema, index) → GUI projection
 ```
 
-- **Self Evolution**：正本ディレクトリ（`memory/` 等）の `.md` 変更。パスで機械判定し、本文の内容からは推測しません。
-- **Observatory Evolution**：実装・スキーマ・索引・UI・ドキュメントなどの変更。
-- 1 つのコミットが片方だけ・両方（Both）・どちらでもないケースがありえます。first-parent とのパス差分から独立フラグ（`self_changed` / `observatory_changed`）を導出します（真の root は空ツリー比較、shallow 境界は `unavailable` + `null`）。
-- **Interpretation Shift（解釈の変化）**：新しい parser で再索引すると過去データから新たな関係が見えることがありますが、それは「ツールの見え方が変わった」のであり「本人が新しく変わった」わけではありません。
-- 詳細なパス規則とバージョン境界は [閲覧 API（Evolution classification）](self-observatory-api.md#evolution-classification) を参照してください。
+- **Self Evolution**: `.md` changes under canonical note directories (`memory/`, etc.), determined mechanically by path rather than guessing from text.
+- **Observatory Evolution**: changes to implementation, schema, indexer, UI, or docs.
+- Each commit can touch one, both, or neither. Independent flags (`self_changed`, `observatory_changed`) are derived from the diff against `first-parent` (empty tree for the true root; `unavailable` at shallow boundaries).
+- **Interpretation Shift**: Re-indexing with a newer parser may reveal new relations in past data—that reflects a change in the tool, not a new change in the person.
 
-### Self Time Volume プロトタイプ
+### Self Time Volume (experimental)
 
-採用順（first-parent）にスナップショットを重ね、同一ノート ID の連続出現を線（worldline）で結ぶ 3D-to-SVG の探索ビューです。  
-配置座標は使い捨ての派生インデックスであり、正本には保存しません。詳細は [Self Time Volume プロトタイプ](self-time-volume.md) を参照してください。
+An experimental 3D-to-SVG view stacking snapshots along first-parent order and connecting revisions of each note ID with worldlines. Layout coordinates are disposable derived data and are never written back to Markdown.

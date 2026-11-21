@@ -1,8 +1,8 @@
 # self-observatory-template
 
-> **人間を、検査可能でバージョン管理されたモデルとして扱う。**
+[English](README.md) | [日本語](README.ja.md) | [ドキュメント一覧](docs/ja/README.md)
 
-[English / Bilingual README](README.md) | [ドキュメント一覧](docs/README.md)
+> **人間を、検査可能でバージョン管理されたモデルとして扱う。**
 
 Second Brain でも、単なるナレッジベースでもありません。  
 経験が自分の判断をどう変えたかを、履歴ごと扱うための **Git-native Personal OS** のテンプレートリポジトリです。
@@ -35,6 +35,7 @@ uv run self-observatory serve --port 8000 --ui-dir apps/observatory/dist
 ```
 
 - ブラウザで `http://127.0.0.1:8000` を開くと、同梱の架空サンプルノート（`example-first-observation` / `example-start-small`）を確認できます。
+- ローカル GUI は **英語・日本語の両対応** です（ブラウザ言語を自動判定し、ヘッダーの `EN` / `日本語` ボタンや `?lang=ja` / `?lang=en` で切り替えられます）。
 - 自分の記録を書き始めたら `memory/episodes/example-first-observation.md` と `memory/principles/example-start-small.md` は削除してかまいません。
 - `main` / `origin/main` が進んだら `uv run self-observatory index --rebuild` を再実行します。
 - 任意の環境変数：
@@ -89,8 +90,8 @@ assets/            # 無害化済みのバイナリ実体
 templates/         # 記述テンプレート
 scripts/           # 検証・メンテナンススクリプト
 src/               # ローカル閲覧 API・索引・安全チェック CLI
-apps/observatory/  # ローカル閲覧 GUI (React + Vite)
-docs/              # 思想・設計・手順・安全ドキュメント
+apps/observatory/  # ローカル閲覧 GUI (React + Vite・日英対応)
+docs/              # 思想・設計・手順・安全ドキュメント（EN + docs/ja/）
 ```
 
 ## データ境界
@@ -105,11 +106,13 @@ Private リポジトリであっても、生の外部データはそのまま入
 
 ## ドキュメント案内
 
-- **まずは読む**：[取扱説明書](docs/how-to-use.md) / [ドキュメント一覧](docs/README.md) / [Philosophy](docs/philosophy.md) / [Architecture](docs/architecture.md)
-- **ルール・スキーマ**：[AGENTS.md](AGENTS.md) / [DATA_POLICY.md](DATA_POLICY.md) / [SCHEMA.md](SCHEMA.md) / [デザイン原則](design/README.md)
-- **記録・安全手順**：[Capture](docs/capture.md) / [記録前の安全チェック](docs/privacy-ingress.md) / [気づきの整理と実施結果](docs/experience-feedback-workflow.md) / [Media](docs/media.md) / [Threat Model](docs/threat-model.md) / [Incident Response](docs/incident-response.md)
-- **Self Observatory 設計・仕様**：[GUI ビジョン](docs/self-observatory.md) / [実装設計](docs/self-observatory-design.md) / [データ契約](docs/self-observatory-data-contracts.md) / [閲覧 API](docs/self-observatory-api.md) / [体験・整理・実施設計](docs/experience-feedback-design.md) / [Self Time Volume](docs/self-time-volume.md) / [ローカル GUI README](apps/observatory/README.md)
+- **まずは読む**：[取扱説明書](docs/ja/how-to-use.md) / [ドキュメント一覧](docs/ja/README.md) / [Philosophy](docs/ja/philosophy.md) / [Architecture](docs/ja/architecture.md) / [ローカル GUI README](apps/observatory/README.ja.md)
+- **ルール・スキーマ**：[AGENTS.md（日本語）](docs/ja/AGENTS.md) / [DATA_POLICY.md](DATA_POLICY.md) / [SCHEMA.md](SCHEMA.md) / [デザイン原則](design/README.md)
+- **記録・安全手順**：[Capture](docs/ja/capture.md) / [記録前の安全チェック](docs/privacy-ingress.md) / [気づきの整理と実施結果](docs/experience-feedback-workflow.md) / [Media](docs/media.md) / [Threat Model](docs/threat-model.md) / [Incident Response](docs/incident-response.md)
+- **Self Observatory 設計・仕様**：[GUI ビジョン](docs/self-observatory.md) / [実装設計](docs/self-observatory-design.md) / [データ契約](docs/self-observatory-data-contracts.md) / [閲覧 API](docs/self-observatory-api.md) / [体験・整理・実施設計](docs/experience-feedback-design.md) / [Self Time Volume](docs/self-time-volume.md)
 - **計画**：[Roadmap](docs/roadmap.md)
+
+> **記憶を増やすことより、経験を原則と行動へ変換する。**
 
 ## ライセンス
 

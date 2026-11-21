@@ -1,22 +1,22 @@
-# メモの仮題
+# Working title
 
-<!-- `_local/inbox/` にコピーして使う。Gitへ移す前に DATA_POLICY.md を確認する。認証情報や仕事の機密資料は貼らない。 -->
+<!-- Copy to `_local/inbox/` to use. Check DATA_POLICY.md before moving anything into Git. Never paste credentials or confidential work material. -->
 
-記録日:
-出典: 自分の経験 / 保存した言葉・作品 / その他
+Date:
+Source: Direct experience / Saved quote or work / Other
 
-## 残したいこと
-
-
-## 観測したこと
+## What to keep
 
 
-## 自分の解釈・仮説
+## Observation (what happened)
 
 
-## 未確認のこと
+## Interpretation / hypothesis
 
 
-## 正本に残すなら
+## Uncertainty (what is still unknown)
 
-再利用できる意味と、移す先のノート種別を書く。判断がつかなければ、このローカルメモのままにする。
+
+## Candidate canonical placement
+
+Describe the reusable meaning and target note type (`episode`, `pattern`, `principle`, etc.). If unsure, leave it in `_local/inbox/` for now.

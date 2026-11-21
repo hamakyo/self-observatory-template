@@ -14,7 +14,7 @@ from self_observatory.capture import check_proposal, import_captures, make_propo
 from self_observatory.feedback import transition_diagnostics
 from self_observatory.index import rebuild
 from self_observatory.schema import SchemaError, parse_note
-from self_observatory.temporal import temporal_bounds, validate_temporal
+from self_observatory.temporal import temporal_bounds, temporal_label, validate_temporal
 from self_observatory.validation import validate_feedback_tree, working_records
 from test_backend import git
 
@@ -109,6 +109,15 @@ def test_temporal_bounds_are_calendar_ranges():
     assert date.fromordinal(upper) == date(2024, 3, 1)
     assert temporal_bounds({"precision": "unknown"}) is None
     assert temporal_bounds({"precision": "year", "value": "9999"})[1] == date.max.toordinal() + 1
+
+
+def test_temporal_label_supports_en_and_ja():
+    rng = {"precision": "range", "start": {"precision": "year", "value": "2024"}, "end": {"precision": "month", "value": "2025-03"}}
+    assert temporal_label(None, lang="ja") == "未記録"
+    assert temporal_label(None, lang="en") == "Unrecorded"
+    assert temporal_label({"precision": "unknown"}, lang="en") == "Unknown"
+    assert temporal_label(rng, lang="ja") == "2024年〜2025年3月"
+    assert temporal_label(rng, lang="en") == "2024 – 2025-03"
 
 
 def test_experience_does_not_leak_into_older_snapshots(feedback_history):

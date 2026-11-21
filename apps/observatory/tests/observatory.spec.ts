@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+test.use({ locale: "ja-JP" });
+
 test("Overview → note → provenance → past → diff → back and reload", async ({
   page,
   request,

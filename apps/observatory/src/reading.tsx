@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  NoteFeedback,
-  ReviewDecision,
-  TemporalMetadata,
-  outcomes,
-} from "./feedback";
+import { NoteFeedback, ReviewDecision, TemporalMetadata } from "./feedback";
 import type { Context } from "./App";
 import { query, useLoad, type Schema, type Snapshot } from "./api";
 import {
@@ -15,16 +10,16 @@ import {
   Select,
   Status,
 } from "./components";
+import { useI18n, type Dictionary } from "./i18n";
 import {
   confirmation,
   dateTime,
   fieldLabel,
-  kinds,
+  kindLabel,
   maturityLabel,
   noteTypeLabel,
   record,
   review,
-  schedules,
   short,
   statusLabel,
   text,
@@ -43,6 +38,7 @@ const noteTypes = [
   "media",
 ];
 export function Overview({ overview, update, at, note, snapshots }: Context) {
+  const { lang, t } = useI18n();
   const firstParent = snapshots.find((s) => s.sha === at)?.first_parent;
   const comparable = snapshots.some((s) => s.sha === firstParent);
   const recent = useLoad<Schema["DiffResponse"]>(
@@ -62,7 +58,7 @@ export function Overview({ overview, update, at, note, snapshots }: Context) {
     <Status load={overview}>
       {(data) => (
         <>
-          <p className="lede">選んだ時点のノート数と、確認が必要な記録です。</p>
+          <p className="lede">{t.overview.lede}</p>
           <div className="stats">
             <button
               onClick={() =>
@@ -76,9 +72,9 @@ export function Overview({ overview, update, at, note, snapshots }: Context) {
                 })
               }
             >
-              <span>すべてのノート</span>
+              <span>{t.overview.allNotes}</span>
               <strong>{data.total}</strong>
-              <small>一覧を見る ↗</small>
+              <small>{t.overview.openList}</small>
             </button>
             <button
               onClick={() =>
@@ -89,9 +85,9 @@ export function Overview({ overview, update, at, note, snapshots }: Context) {
                 })
               }
             >
-              <span>未確認</span>
+              <span>{t.overview.unconfirmed}</span>
               <strong>{data.review.unrecorded}</strong>
-              <small>確認リストへ ↗</small>
+              <small>{t.overview.openReview}</small>
             </button>
             <button
               onClick={() =>
@@ -102,19 +98,18 @@ export function Overview({ overview, update, at, note, snapshots }: Context) {
                 })
               }
             >
-              <span>期限切れ</span>
+              <span>{t.overview.overdue}</span>
               <strong>{data.review.overdue}</strong>
-              <small>基準日 {data.as_of} ↗</small>
+              <small>{t.overview.asOfDate(data.as_of)}</small>
             </button>
           </div>
           {!!data.excluded && (
             <p className="warning message">
-              読み込めなかった記録が {data.excluded}{" "}
-              件あります（有効なノートのみ集計）。
+              {t.overview.excludedWarning(data.excluded)}
             </p>
           )}
           <section>
-            <h2>種類ごとの件数</h2>
+            <h2>{t.overview.countsByType}</h2>
             <div className="type-counts">
               {Object.entries(data.by_type).map(([type, count]) => (
                 <button
@@ -130,16 +125,16 @@ export function Overview({ overview, update, at, note, snapshots }: Context) {
                     })
                   }
                 >
-                  <span>{noteTypeLabel(type)}</span>
+                  <span>{noteTypeLabel(type, lang)}</span>
                   <strong>{count}</strong>
                 </button>
               ))}
             </div>
-            {!data.total && <Empty>この時点のノートは 0 件です。</Empty>}
+            {!data.total && <Empty>{t.overview.zeroNotesAtSnapshot}</Empty>}
           </section>
           <section>
             <div className="section-heading">
-              <h2>この時点の変更</h2>
+              <h2>{t.overview.changesAtSnapshot}</h2>
               <button
                 disabled={!comparable}
                 onClick={() =>
@@ -151,12 +146,12 @@ export function Overview({ overview, update, at, note, snapshots }: Context) {
                   })
                 }
               >
-                差分を見る ↗
+                {t.overview.viewDiff}
               </button>
             </div>
-            <p className="muted">直前のコミットからのノート変更</p>
+            <p className="muted">{t.overview.changesSubtitle}</p>
             {!comparable ? (
-              <p>最初のコミットのため比較対象がありません。</p>
+              <p>{t.overview.firstCommitNoParent}</p>
             ) : (
               <Status load={recent}>
                 {(diff) => (
@@ -166,7 +161,7 @@ export function Overview({ overview, update, at, note, snapshots }: Context) {
                         {diff.items.map((item) => (
                           <li key={item.id}>
                             <span className="badge">
-                              {kinds[item.kind] || item.kind}
+                              {kindLabel(item.kind, lang)}
                             </span>
                             <button
                               aria-pressed={note === item.id}
@@ -176,18 +171,17 @@ export function Overview({ overview, update, at, note, snapshots }: Context) {
                                 item.after?.title ||
                                   item.before?.title ||
                                   item.id,
+                                lang,
                               )}
                             </button>
                           </li>
                         ))}
                       </ul>
                     ) : (
-                      <Empty>直前からノートの変更はありません。</Empty>
+                      <Empty>{t.overview.noChangesSinceParent}</Empty>
                     )}
                     {diff.next_cursor !== null && (
-                      <p>
-                        一部のみ表示しています。すべて見るには「差分を見る」を開いてください。
-                      </p>
+                      <p>{t.overview.partialDiffNotice}</p>
                     )}
                   </>
                 )}
@@ -200,6 +194,7 @@ export function Overview({ overview, update, at, note, snapshots }: Context) {
   );
 }
 export function Browse({ params, update, at, note }: Context) {
+  const { lang, t } = useI18n();
   const cursor = Math.max(0, Number(params.get("cursor")) || 0);
   const notes = useLoad<Schema["NotesResponse"]>(
     query("notes", {
@@ -217,31 +212,33 @@ export function Browse({ params, update, at, note }: Context) {
     <>
       <div className="filters">
         <Select
-          label="種類"
+          label={t.browse.type}
           value={params.get("type") || ""}
           options={[
-            ["", "すべて"],
-            ...noteTypes.map((v) => [v, noteTypeLabel(v)] as [string, string]),
+            ["", t.all],
+            ...noteTypes.map(
+              (v) => [v, noteTypeLabel(v, lang)] as [string, string],
+            ),
           ]}
           onChange={(type) => update({ type, cursor: null })}
         />
         <Select
-          label="状態"
+          label={t.browse.status}
           value={params.get("status") || ""}
           options={["", "active", "draft", "superseded", "archived"].map(
-            (v) => [v, v ? statusLabel(v) : "すべて"],
+            (v) => [v, v ? statusLabel(v, lang) : t.all],
           )}
           onChange={(status) => update({ status, cursor: null })}
         />
         <label className="field">
-          領域
+          {t.browse.domain}
           <input
-            aria-label="領域"
+            aria-label={t.browse.domain}
             value={params.get("domain") || ""}
             onChange={(e) =>
               update({ domain: e.target.value, cursor: null }, true)
             }
-            placeholder="領域名で絞る"
+            placeholder={t.browse.domainPlaceholder}
           />
         </label>
         <button
@@ -255,19 +252,19 @@ export function Browse({ params, update, at, note }: Context) {
             })
           }
         >
-          リセット
+          {t.reset}
         </button>
       </div>
       <Status load={notes}>
         {(data) => (
           <>
             <p className="result-count">
-              {data.total} 件
-              {params.get("q") && ` · 検索「${params.get("q")}」`}
+              {t.countItems(data.total)}
+              {params.get("q") && t.browse.searchSuffix(params.get("q")!)}
             </p>
             {!!data.excluded && (
               <p className="warning message">
-                読み込めなかった記録 {data.excluded} 件を除外しています。
+                {t.browse.excludedNotice(data.excluded)}
               </p>
             )}
             <NoteList notes={data.items} selected={note} update={update} />
@@ -281,6 +278,7 @@ export function Browse({ params, update, at, note }: Context) {
   );
 }
 export function Review({ params, update, at }: Context) {
+  const { lang, t } = useI18n();
   const queue = useLoad<Schema["ReviewQueueResponse"]>(
     query("review-queue", { at, as_of: params.get("as_of") }),
     {
@@ -290,12 +288,10 @@ export function Review({ params, update, at }: Context) {
   );
   return (
     <>
-      <p className="lede">
-        確認がまだのノートや、見直し時期を過ぎたノートを確認できます（期限を過ぎても内容は変わりません）。
-      </p>
+      <p className="lede">{t.review.lede}</p>
       <div className="filters">
         <label className="field">
-          基準日
+          {t.review.asOf}
           <input
             type="date"
             value={params.get("as_of") || ""}
@@ -303,20 +299,20 @@ export function Review({ params, update, at }: Context) {
           />
         </label>
         <Select
-          label="確認状態"
+          label={t.review.confirmationState}
           value={params.get("confirmation") || ""}
           options={[
-            ["", "すべて"],
-            ["true", "確認済み"],
-            ["false", "未確認（明示）"],
-            ["unrecorded", "未確認（未記録）"],
+            ["", t.all],
+            ["true", t.confirmation.true],
+            ["false", t.confirmation.false],
+            ["unrecorded", t.confirmation.unrecordedExplicit],
           ]}
           onChange={(confirmation) => update({ confirmation })}
         />
         <Select
-          label="見直し期限"
+          label={t.review.schedule}
           value={params.get("schedule") || ""}
-          options={[["", "すべて"], ...Object.entries(schedules)]}
+          options={[["", t.all], ...Object.entries(t.schedules)]}
           onChange={(schedule) => update({ schedule })}
         />
       </div>
@@ -335,11 +331,14 @@ export function Review({ params, update, at }: Context) {
           return (
             <>
               <p className="result-count">
-                基準日 {data.as_of} · 確認済み {data.confirmation.true} /
-                未確認（明示） {data.confirmation.false} / 未確認（未記録）{" "}
-                {data.confirmation.unrecorded}
+                {t.review.summary(
+                  data.as_of,
+                  data.confirmation.true,
+                  data.confirmation.false,
+                  data.confirmation.unrecorded,
+                )}
               </p>
-              <p>{rows.length} 件</p>
+              <p>{t.countItems(rows.length)}</p>
               {!rows.length ? (
                 <Empty />
               ) : (
@@ -349,9 +348,9 @@ export function Review({ params, update, at }: Context) {
                       <button onClick={() => update({ note: row.id })}>
                         {row.title}
                       </button>
-                      <span>{confirmation(row.owner_confirmed)}</span>
+                      <span>{confirmation(row.owner_confirmed, lang)}</span>
                       <span className={row.overdue ? "due badge" : "badge"}>
-                        {schedules[row.schedule]}
+                        {t.schedules[row.schedule] || row.schedule}
                         {row.review_after && ` · ${row.review_after}`}
                       </span>
                     </li>
@@ -365,12 +364,14 @@ export function Review({ params, update, at }: Context) {
     </>
   );
 }
-function evolutionLabel(snapshot: Snapshot) {
-  if (snapshot.change_basis === "unavailable") return "— 判定不可";
-  if (snapshot.self_changed && snapshot.observatory_changed) return "◉ 両方";
-  if (snapshot.self_changed) return "● ノート";
-  if (snapshot.observatory_changed) return "○ 仕組み";
-  return "· その他";
+function evolutionLabel(snapshot: Snapshot, t: Dictionary) {
+  if (snapshot.change_basis === "unavailable")
+    return t.trajectory.evoUnavailable;
+  if (snapshot.self_changed && snapshot.observatory_changed)
+    return t.trajectory.evoBoth;
+  if (snapshot.self_changed) return t.trajectory.evoSelf;
+  if (snapshot.observatory_changed) return t.trajectory.evoObservatory;
+  return t.trajectory.evoOther;
 }
 
 export function Trajectory({
@@ -381,6 +382,7 @@ export function Trajectory({
   update,
   setAt,
 }: Context & { setAt: (sha: string) => void }) {
+  const { lang, t } = useI18n();
   const [on, setOn] = useState("");
   const evolution = ["all", "observatory"].includes(
     params.get("evolution") || "",
@@ -402,17 +404,15 @@ export function Trajectory({
   );
   return (
     <>
-      <p className="lede">
-        ノートと仕組みの更新履歴を Git の採用順にたどります。
-      </p>
+      <p className="lede">{t.trajectory.lede}</p>
       <div className="filters trajectory-controls">
         <Select
-          label="表示する履歴"
+          label={t.trajectory.filterLabel}
           value={evolution}
           options={[
-            ["self", "ノートのみ（両方含む）"],
-            ["observatory", "仕組みのみ（両方含む）"],
-            ["all", "すべて"],
+            ["self", t.trajectory.filterSelf],
+            ["observatory", t.trajectory.filterObservatory],
+            ["all", t.all],
           ]}
           onChange={(evolution) => update({ evolution })}
         />
@@ -420,13 +420,13 @@ export function Trajectory({
           disabled={!previous}
           onClick={() => previous && setAt(previous.sha)}
         >
-          前の時点
+          {t.trajectory.prevSnapshot}
         </button>
         <button disabled={!next} onClick={() => next && setAt(next.sha)}>
-          次の時点
+          {t.trajectory.nextSnapshot}
         </button>
         <label className="field">
-          日付から探す
+          {t.trajectory.findByDate}
           <input
             type="date"
             value={on}
@@ -434,20 +434,22 @@ export function Trajectory({
           />
         </label>
       </div>
-      <p className="legend">● ノート　○ 仕組み　◉ 両方　· その他　— 判定不可</p>
+      <p className="legend">{t.trajectory.legend}</p>
       {current && !visible.includes(current) && (
         <p className="message">
-          選択中の {short(at)}（{evolutionLabel(current)}
-          ）はこの条件に含まれません。
+          {t.trajectory.excludedFromFilter(
+            short(at),
+            evolutionLabel(current, t),
+          )}
           <button onClick={() => update({ evolution: "all" })}>
-            すべて表示
+            {t.trajectory.showAll}
           </button>
         </p>
       )}
       {!snapshotsReady ? (
-        <p role="status">履歴を読み込み中…</p>
+        <p role="status">{t.trajectory.loadingHistory}</p>
       ) : (
-        !visible.length && <Empty>該当する変更履歴はありません。</Empty>
+        !visible.length && <Empty>{t.trajectory.emptyHistory}</Empty>
       )}
       {on && (
         <Status load={selection}>
@@ -455,18 +457,20 @@ export function Trajectory({
             <>
               {data.coverage.committer_time_inversion && (
                 <p className="warning message">
-                  コミット日時に前後があります。条件に合う最後の時点を選びます。
+                  {t.trajectory.timeInversionWarning}
                 </p>
               )}
               {data.date_selection?.sha ? (
                 <button onClick={() => setAt(data.date_selection!.sha!)}>
-                  この日の時点へ · {short(data.date_selection.sha)}
+                  {t.trajectory.jumpToDateSnapshot(
+                    short(data.date_selection.sha),
+                  )}
                 </button>
               ) : (
                 <Empty>
                   {data.date_selection?.state === "history_unavailable"
-                    ? "この日付は取得範囲外です。"
-                    : "この日までに該当する変更はありません。"}
+                    ? t.trajectory.dateOutOfRange
+                    : t.trajectory.noChangesByDate}
                 </Empty>
               )}
             </>
@@ -487,12 +491,12 @@ export function Trajectory({
               onClick={() => setAt(snapshot.sha)}
             >
               <span>
-                {dateTime(snapshot.committed_at)}{" "}
+                {dateTime(snapshot.committed_at, lang)}{" "}
                 <code>{short(snapshot.sha)}</code>
               </span>
               <strong>{snapshot.subject}</strong>
               <span className="evolution-label">
-                {evolutionLabel(snapshot)}
+                {evolutionLabel(snapshot, t)}
               </span>
             </button>
             <button
@@ -510,28 +514,35 @@ export function Trajectory({
                 })
               }
             >
-              直前との差分
+              {t.trajectory.diffFromParent}
             </button>
             <details className="evolution-paths">
               <summary>
-                変更ファイル ·{" "}
                 {snapshot.change_basis === "unavailable"
-                  ? "比較元なし"
-                  : `ノート ${snapshot.self_change_paths.length} / 仕組み ${snapshot.observatory_change_paths.length}`}
+                  ? t.trajectory.changedFilesUnavailable
+                  : t.trajectory.changedFilesCounts(
+                      snapshot.self_change_paths.length,
+                      snapshot.observatory_change_paths.length,
+                    )}
               </summary>
               {snapshot.change_basis === "unavailable" ? (
-                <p>比較元がないため判定できません。</p>
+                <p>{t.trajectory.cannotClassify}</p>
               ) : (
                 <>
                   <p className="muted">
                     {snapshot.change_basis === "empty_tree"
-                      ? "最初のコミット（空から追加）"
-                      : `直前 ${short(snapshot.first_parent!)} との比較（パスで自動分類）`}
+                      ? t.trajectory.initialCommitBasis
+                      : t.trajectory.parentCommitBasis(
+                          short(snapshot.first_parent!),
+                        )}
                   </p>
                   {(
                     [
-                      ["ノート", snapshot.self_change_paths],
-                      ["仕組み", snapshot.observatory_change_paths],
+                      [t.trajectory.selfGroup, snapshot.self_change_paths],
+                      [
+                        t.trajectory.observatoryGroup,
+                        snapshot.observatory_change_paths,
+                      ],
                     ] as const
                   ).map(
                     ([label, paths]) =>
@@ -549,7 +560,7 @@ export function Trajectory({
                       ),
                   )}
                   {!snapshot.self_changed && !snapshot.observatory_changed && (
-                    <p>対象ファイルの変更はありません。</p>
+                    <p>{t.trajectory.noTargetFileChanges}</p>
                   )}
                 </>
               )}
@@ -561,6 +572,7 @@ export function Trajectory({
   );
 }
 export function Detail({ at, note, update }: Context) {
+  const { lang, t } = useI18n();
   const detail = useLoad<Schema["NoteDetail"]>(
     query(`notes/${encodeURIComponent(note)}`, { at }),
     { commit_sha: at },
@@ -575,12 +587,12 @@ export function Detail({ at, note, update }: Context) {
   return (
     <>
       <div className="detail-top">
-        <p className="eyebrow">ノート · {short(at)}</p>
+        <p className="eyebrow">{t.detail.eyebrow(short(at))}</p>
         <button
-          aria-label="詳細を閉じる"
+          aria-label={t.detail.closeAria}
           onClick={() => update({ note: null })}
         >
-          閉じる ×
+          {t.detail.closeButton}
         </button>
       </div>
       <Status load={detail}>
@@ -590,53 +602,60 @@ export function Detail({ at, note, update }: Context) {
             <code className="note-id">{data.id}</code>
             <dl className="metadata">
               <div>
-                <dt>種類</dt>
-                <dd>{noteTypeLabel(data.frontmatter.type)}</dd>
+                <dt>{t.fields.type}</dt>
+                <dd>{noteTypeLabel(data.frontmatter.type, lang)}</dd>
               </div>
               <div>
-                <dt>状態</dt>
-                <dd>{statusLabel(data.frontmatter.status)}</dd>
+                <dt>{t.fields.status}</dt>
+                <dd>{statusLabel(data.frontmatter.status, lang)}</dd>
               </div>
               <div>
-                <dt>成熟度</dt>
-                <dd>{maturityLabel(data.frontmatter.maturity)}</dd>
+                <dt>{t.fields.maturity}</dt>
+                <dd>{maturityLabel(data.frontmatter.maturity, lang)}</dd>
               </div>
               <div>
-                <dt>確認</dt>
+                <dt>{t.fields.review}</dt>
                 <dd>
                   {confirmation(
                     review(data.frontmatter.review).owner_confirmed,
+                    lang,
                   )}
                 </dd>
               </div>
               {review(data.frontmatter.review).confirmed_at && (
                 <div>
-                  <dt>確認日</dt>
-                  <dd>{text(review(data.frontmatter.review).confirmed_at)}</dd>
+                  <dt>{t.detail.confirmedAt}</dt>
+                  <dd>
+                    {text(review(data.frontmatter.review).confirmed_at, lang)}
+                  </dd>
                 </div>
               )}
               {review(data.frontmatter.review).review_after && (
                 <div>
-                  <dt>見直し日</dt>
-                  <dd>{text(review(data.frontmatter.review).review_after)}</dd>
+                  <dt>{t.detail.reviewAfter}</dt>
+                  <dd>
+                    {text(review(data.frontmatter.review).review_after, lang)}
+                  </dd>
                 </div>
               )}
             </dl>
             <TemporalMetadata data={data.frontmatter} />
             {data.frontmatter.application && (
               <p>
-                試した結果:{" "}
-                {outcomes[String(record(data.frontmatter.application).outcome)]}
+                {t.detail.applicationOutcome}{" "}
+                {t.feedback.outcomes[
+                  String(record(data.frontmatter.application).outcome)
+                ] || String(record(data.frontmatter.application).outcome)}
               </p>
             )}
             <div className="detail-actions">
               <button
                 onClick={() => update({ view: "provenance", graph: null })}
               >
-                つながりを見る
+                {t.detail.viewProvenance}
               </button>
               <button onClick={() => update({ view: "diff" })}>
-                差分を見る
+                {t.detail.viewDiff}
               </button>
             </div>
             <ReviewDecision data={data.frontmatter} />
@@ -644,11 +663,13 @@ export function Detail({ at, note, update }: Context) {
             <NoteFeedback at={at} note={note} update={update} />
             {data.frontmatter.type === "media" && (
               <section>
-                <h3>添付画像</h3>
+                <h3>{t.detail.attachedMedia}</h3>
                 {!showMedia ? (
-                  <button onClick={() => setShowMedia(true)}>画像を表示</button>
+                  <button onClick={() => setShowMedia(true)}>
+                    {t.detail.showImage}
+                  </button>
                 ) : mediaError ? (
-                  <p role="alert">画像を表示できません。</p>
+                  <p role="alert">{t.detail.mediaError}</p>
                 ) : (
                   <img
                     className="approved-media"
@@ -660,13 +681,13 @@ export function Detail({ at, note, update }: Context) {
               </section>
             )}
             <section>
-              <h3>出典</h3>
+              <h3>{t.detail.source}</h3>
               {data.frontmatter.source ? (
                 <dl className="source">
                   {Object.entries(data.frontmatter.source).map(
                     ([key, value]) => (
                       <div key={key}>
-                        <dt>{fieldLabel(key)}</dt>
+                        <dt>{fieldLabel(key, lang)}</dt>
                         <dd>
                           {typeof value === "string" &&
                           /^https?:\/\//i.test(value) ? (
@@ -678,7 +699,7 @@ export function Detail({ at, note, update }: Context) {
                               {value}
                             </a>
                           ) : (
-                            text(value)
+                            text(value, lang)
                           )}
                         </dd>
                       </div>
@@ -686,15 +707,15 @@ export function Detail({ at, note, update }: Context) {
                   )}
                 </dl>
               ) : (
-                <p>出典はありません。</p>
+                <p>{t.detail.noSource}</p>
               )}
             </section>
             <section>
-              <h3>つながり</h3>
+              <h3>{t.detail.relations}</h3>
               {["derived_from", "related", "supersedes", "superseded_by"].map(
                 (key) => (
                   <div className="relations" key={key}>
-                    <small>{kinds[key] || key}</small>
+                    <small>{kindLabel(key, lang)}</small>
                     {Array.isArray(data.frontmatter[key]) &&
                     data.frontmatter[key].length ? (
                       data.frontmatter[key].map((id: string) => (
@@ -703,14 +724,14 @@ export function Detail({ at, note, update }: Context) {
                         </button>
                       ))
                     ) : (
-                      <span>なし</span>
+                      <span>{t.none}</span>
                     )}
                   </div>
                 ),
               )}
             </section>
             <section>
-              <h3>更新履歴</h3>
+              <h3>{t.detail.updateHistory}</h3>
               <Status load={history}>
                 {(versions) => (
                   <ul className="history">
@@ -721,7 +742,8 @@ export function Detail({ at, note, update }: Context) {
                             update({ at: item.sha, as_of: null, cursor: null })
                           }
                         >
-                          {dateTime(item.committed_at)} · {short(item.sha)}
+                          {dateTime(item.committed_at, lang)} ·{" "}
+                          {short(item.sha)}
                         </button>
                         <small>{item.path}</small>
                       </li>
@@ -742,36 +764,31 @@ export function Detail({ at, note, update }: Context) {
   );
 }
 export function Capture({ githubUrl }: Pick<Context, "githubUrl">) {
+  const { t } = useI18n();
   return (
     <div className="capture">
-      <p className="lede">
-        生の会話ではなく、あとから使える学びだけを残します。
-      </p>
-      <h2>メモを残す流れ</h2>
+      <p className="lede">{t.capture.lede}</p>
+      <h2>{t.capture.flowHeading}</h2>
       <ol>
-        <li>起きたこと・解釈・分からないことを分けて書きます。</li>
-        <li>氏名・職場の機密・認証情報を除き、必要な意味だけ残します。</li>
-        <li>無害化したメモを Capture Issue かローカルに置きます。</li>
-        <li>原則・パターン・手順への反映は PR で確認します。</li>
+        {t.capture.flowSteps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
       </ol>
-      <h2>整理して、試した結果を戻す</h2>
+      <h2>{t.capture.consolidateHeading}</h2>
       <ol>
-        <li>関連ノートと見比べて、共通点や反例を整理します。</li>
-        <li>採用・保留・破棄の判断を review に残します。</li>
-        <li>実際に試したら、使った版・行動・結果を episode に記録します。</li>
-        <li>結果をもとに考えを見直し、必要なら差分を PR にします。</li>
+        {t.capture.consolidateSteps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
       </ol>
-      <p className="muted">
-        この画面は閲覧専用です。メモの作成や編集は行いません。
-      </p>
+      <p className="muted">{t.capture.readOnlyNote}</p>
       {githubUrl ? (
         <>
           <a
-            href={`${githubUrl}/blob/main/docs/capture.md`}
+            href={`${githubUrl}/blob/main/${t.capture.captureDocPath}`}
             target="_blank"
             rel="noreferrer"
           >
-            残し方の詳細（docs/capture.md） ↗
+            {t.capture.captureDocLink}
           </a>
           <br />
           <a
@@ -779,12 +796,12 @@ export function Capture({ githubUrl }: Pick<Context, "githubUrl">) {
             target="_blank"
             rel="noreferrer"
           >
-            データ保存ルール（DATA_POLICY.md） ↗
+            {t.capture.policyDocLink}
           </a>
         </>
       ) : (
         <p className="muted">
-          詳細ドキュメント: <code>docs/capture.md</code> /{" "}
+          {t.capture.docsPrefix} <code>{t.capture.captureDocPath}</code> /{" "}
           <code>DATA_POLICY.md</code>
         </p>
       )}

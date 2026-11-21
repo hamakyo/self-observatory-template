@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+test.use({ locale: "ja-JP" });
+
 test("experience precision and historical detail do not backfill old SHA", async ({
   page,
   request,
