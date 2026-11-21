@@ -1,0 +1,74 @@
+name: Observatory UI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/observatory/**"
+      - "design/tokens.json"
+      - "src/self_observatory/**"
+      - "scripts/generate-ui.mjs"
+      - "scripts/ui_fixture.py"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "playwright.config.ts"
+      - ".github/workflows/observatory-ui.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/observatory/**"
+      - "design/tokens.json"
+      - "src/self_observatory/**"
+      - "scripts/generate-ui.mjs"
+      - "scripts/ui_fixture.py"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "playwright.config.ts"
+      - ".github/workflows/observatory-ui.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: observatory-ui-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --locked --extra dev
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: git diff --exit-code -- apps/observatory/src/generated
+      - name: Cache Playwright browsers
+        id: playwright_cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Playwright Chromium shell
+        if: ${{ steps.playwright_cache.outputs.cache-hit != 'true' }}
+        run: pnpm exec playwright install --only-shell chromium
+      - run: pnpm test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-test-results
+          path: test-results/

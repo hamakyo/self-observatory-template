@@ -1,0 +1,83 @@
+name: Capture
+description: Capture a sanitized open loop, experience, question, idea, or reflection candidate.
+title: "[inbox] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This Issue is persisted repository data, not a raw scratchpad.
+        Do not paste credentials, employer/customer/vendor confidential material, unnecessary third-party personal information, private message transcripts, or sensitive source documents.
+        Preserve the reusable meaning. If safe representation is uncertain, keep the source outside GitHub until reviewed.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Type hint
+      description: This is only a hint; classification may change later.
+      options:
+        - Unknown
+        - Episode
+        - Influence
+        - Question
+        - Idea
+        - Goal
+        - Experiment
+        - Decision candidate
+        - Pattern candidate
+        - Principle candidate
+        - Playbook candidate
+    validations:
+      required: true
+
+  - type: textarea
+    id: capture
+    attributes:
+      label: Sanitized capture
+      description: State the minimum reusable meaning. Separate what happened from what you infer where possible.
+      placeholder: Describe the sanitized observation or thought. Do not paste raw confidential source material.
+    validations:
+      required: true
+
+  - type: textarea
+    id: interpretation
+    attributes:
+      label: Current interpretation / hypothesis
+      description: Optional. What might this mean? Keep hypotheses distinct from observations.
+    validations:
+      required: false
+
+  - type: textarea
+    id: uncertainty
+    attributes:
+      label: Uncertainty
+      description: Optional. What is unverified, ambiguous, or intentionally omitted?
+    validations:
+      required: false
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it may matter
+      description: Optional context, stakes, or connection to prior experience.
+    validations:
+      required: false
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Related safe links / IDs
+      description: Optional canonical note IDs or public/safe references. Avoid private source URLs unless necessary and permitted.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy gate
+      options:
+        - label: I removed credentials and authentication material.
+          required: true
+        - label: I removed employer/customer/vendor confidential source material.
+          required: true
+        - label: I minimized unnecessary third-party personal information.
+          required: true

@@ -1,0 +1,23 @@
+.DS_Store
+Thumbs.db
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Local-only quarantine / raw imports
+.quarantine/
+_local/
+_imports/**/raw/
+*.notion-export.zip
+
+# Derived/rebuildable indexes
+.derived/
+.cache/
+node_modules/
+apps/observatory/dist/
+test-results/
+playwright-report/

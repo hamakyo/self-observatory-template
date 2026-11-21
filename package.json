@@ -1,0 +1,34 @@
+{
+  "name": "self-observatory-ui",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev": "vite --config apps/observatory/vite.config.ts",
+    "dev:fixture": "OBSERVATORY_API=http://127.0.0.1:8017 vite --config apps/observatory/vite.config.ts --mode fixture",
+    "fixture": "uv run python scripts/ui_fixture.py",
+    "generate": "node scripts/generate-ui.mjs",
+    "typecheck": "tsc -p apps/observatory/tsconfig.json",
+    "build": "pnpm generate && pnpm typecheck && vite build --config apps/observatory/vite.config.ts",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "benchmark:volume": "node scripts/benchmark-time-volume.mjs",
+    "format": "prettier --write apps/observatory/src apps/observatory/tests apps/observatory/vite.config.ts playwright.config.ts scripts/generate-ui.mjs"
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-markdown": "^10.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "openapi-typescript": "^7.13.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.0"
+  },
+  "type": "module"
+}
