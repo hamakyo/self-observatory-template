@@ -106,7 +106,7 @@ Private リポジトリであっても、生の外部データはそのまま入
 ## ドキュメント案内
 
 - **まずは読む**：[取扱説明書](docs/how-to-use.md) / [ドキュメント一覧](docs/README.md) / [Philosophy](docs/philosophy.md) / [Architecture](docs/architecture.md)
-- **ルール・スキーマ**：[AGENTS.md](AGENTS.md) / [DATA_POLICY.md](DATA_POLICY.md) / [SCHEMA.md](SCHEMA.md) / [Design](design/README.md)
+- **ルール・スキーマ**：[AGENTS.md](AGENTS.md) / [DATA_POLICY.md](DATA_POLICY.md) / [SCHEMA.md](SCHEMA.md) / [デザイン原則](design/README.md)
 - **記録・安全手順**：[Capture](docs/capture.md) / [記録前の安全チェック](docs/privacy-ingress.md) / [気づきの整理と実施結果](docs/experience-feedback-workflow.md) / [Media](docs/media.md) / [Threat Model](docs/threat-model.md) / [Incident Response](docs/incident-response.md)
 - **Self Observatory 設計・仕様**：[GUI ビジョン](docs/self-observatory.md) / [実装設計](docs/self-observatory-design.md) / [データ契約](docs/self-observatory-data-contracts.md) / [閲覧 API](docs/self-observatory-api.md) / [体験・整理・実施設計](docs/experience-feedback-design.md) / [Self Time Volume](docs/self-time-volume.md) / [ローカル GUI README](apps/observatory/README.md)
 - **計画**：[Roadmap](docs/roadmap.md)

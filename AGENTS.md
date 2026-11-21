@@ -8,7 +8,7 @@
 
 - 正本：この repo 内の Markdown ファイル（`memory/`、`playbooks/`、`decisions/`、`journals/`、`reviews/`、`design/`、`docs/` 等）
 - 生成物・派生層（正本ではない）：外部 DB、埋め込み、グラフ、キャッシュ、PDF、UI。生成物は正本から作り直す前提で扱う
-- デザイン言語の正本：`design/`（`design/README.md` と `design/tokens.json`）
+- デザイン原則の正本：`design/`（`design/README.md` と `design/tokens.json`）
 
 ## スキーマ
 

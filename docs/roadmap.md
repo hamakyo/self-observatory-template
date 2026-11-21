@@ -96,7 +96,7 @@ Capture / Import → privacy classifier → 修正候補 → 人間レビュー 
 - [ ] 比喩的な活動マップとしての Memory Weather 実験
 - [ ] 探索的ビューとしての Life Constellation 実験
 - [ ] すべての GUI 索引・キャッシュを Git から再構築可能に維持
-- [x] Observatory Cream デザイン言語の適用
+- [x] デザイン原則の適用
 
 関連：[GUI ビジョン](self-observatory.md) / [実装設計](self-observatory-design.md) / [閲覧 API](self-observatory-api.md)
 

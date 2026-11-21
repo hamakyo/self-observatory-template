@@ -133,7 +133,7 @@ _local/                              Capture・raw import（検索対象外）
 | `memory-weather.webp` | 期間内の変更・未確認・期限・緊張関係を領域別に表示 | 算式と対象ノートを開示。気分や健康状態を推測しない |
 | `life-constellation.webp` | ノートと参照を空間配置で探索・任意再生 | 最初は明示的関係で配置。類似度導入時は凡例を明示 |
 
-### デザイン適用ルール（Observatory Cream Design）
+### デザイン原則の適用ルール
 
 - [design/tokens.json](../design/tokens.json) を CSS 変数へ変換して使用します。
   - 背景：Cream / 本文：Ink / 補助線：Charcoal / 選択：Yellow / 緊張・注意：Blush（Yellow / Blush 上の文字は Ink）。

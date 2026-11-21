@@ -1,8 +1,8 @@
-# Observatory Cream Design
+# Design Principles
 
-A restrained visual and verbal language for Self Observatory.
+A restrained visual and verbal design guide for Self Observatory.
 
-`self-observatory` uses this design system defined in `design/tokens.json`.
+`self-observatory` follows the design principles below and the token values defined in `design/tokens.json`.
 
 The objective is not to make output look "designed".
 It is to remove everything that does not need to be there.
@@ -16,9 +16,9 @@ Prefer whitespace, proportion, typography, and composition over ornament.
 Do not add visual elements merely to make empty space feel occupied.
 Whitespace is intentional.
 
-### 2. Cream Palette
+### 2. Color palette
 
-Use the Cream palette as the default visual language.
+Use the following default palette.
 
 | Token | Hex | Role |
 | --- | --- | --- |

@@ -230,7 +230,7 @@ maturity_changes:
 | `index.py` | tree からの時期・判断・実施記録の派生索引（index v7 / parser v3） |
 | `models.py` / `api.py` | 閲覧専用の 3 API（`/api/experiences`・`/api/captures`・`/api/applications`） |
 | `cli.py` 等 | 候補生成・鮮度確認・整合検証・索引再構築 |
-| `apps/observatory/src/` | 「体験の時期」「気づきの整理」「試した記録」の 3 画面（Observatory Cream Design 準拠、状態は色だけに頼らず文字で表示） |
+| `apps/observatory/src/` | 「体験の時期」「気づきの整理」「試した記録」の 3 画面（デザイン原則準拠、状態は色だけに頼らず文字で表示） |
 
 ### 後方互換ルール
 

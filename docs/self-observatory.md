@@ -126,7 +126,7 @@ Episode を小さな星、Pattern を星団、Principle を明るい基準星、
 2. **自動化ではなく注意喚起（Attention, not automation）**：怪しい場所や古い場所を示すだけで、AI や UI が勝手に格下げ・確定しない。
 3. **履歴は一級市民（History is first-class）**：`HEAD` は現在の投影にすぎず、過去や見送ったブランチも同じ重みで見られる。
 4. **すべて再構築可能（Derived and rebuildable）**：すべての索引・キャッシュは正本 Git と承認済み参照から作り直せる。
-5. **Observatory Cream Design 準拠**：背景 Cream (`#FBF8F1`)・文字と構造 Ink (`#272626`) / Charcoal (`#49494B`)・意味アクセントのみ Yellow (`#FADB6E`) / Blush (`#FBD8CB`)・Helvetica Neue・十分な余白。装飾グラデーションや発光、汎用 AI ダッシュボード風スタイルは使わない。
+5. **デザイン原則準拠**：背景 Cream (`#FBF8F1`)・文字と構造 Ink (`#272626`) / Charcoal (`#49494B`)・意味アクセントのみ Yellow (`#FADB6E`) / Blush (`#FBD8CB`)・Helvetica Neue・十分な余白。装飾グラデーションや発光、汎用 AI ダッシュボード風スタイルは使わない。
 
 ---
 
