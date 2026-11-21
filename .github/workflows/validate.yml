@@ -36,8 +36,15 @@ jobs:
         env:
           FEEDBACK_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
-          if [ -n "$FEEDBACK_BASE" ] && [ "$FEEDBACK_BASE" != "0000000000000000000000000000000000000000" ]; then
-            uv run self-observatory validate-feedback --base "$FEEDBACK_BASE"
+          if [ -z "$FEEDBACK_BASE" ] || [ "$FEEDBACK_BASE" = "0000000000000000000000000000000000000000" ]; then
+            echo "No base commit; skipping feedback validation."
+            exit 0
           fi
+          # After a force push, the previous head may no longer be part of the history.
+          if ! git merge-base --is-ancestor "$FEEDBACK_BASE" HEAD 2>/dev/null; then
+            echo "::warning::Base $FEEDBACK_BASE is not in the current history (force push?). Skipping feedback validation."
+            exit 0
+          fi
+          uv run self-observatory validate-feedback --base "$FEEDBACK_BASE"
       - name: Backend tests
         run: uv run pytest -q
